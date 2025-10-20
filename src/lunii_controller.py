@@ -1,29 +1,42 @@
-from src.ollama_controller import OllamaController
-from src.voice_controller import VoiceController
+from src.input_controller import InputController, InputControllerAction
 from src.mic_controller import MicController
-from src.input_controller import InputController
+from src.ollama_controller import OllamaController
+from src.states import InputControllerState, InputControllerStateMachine
+from src.voice_controller import VoiceController
 
-import PySide6.QtCore
-from PySide6 import QtCore
-from PySide6.QtWidgets import QApplication
 
 class LuniiController:
-
-    ollama: OllamaController = None
-    voice: VoiceController = None
-    mic: MicController = None
-    input: InputController = None
-
     def __init__(self):
         self.ollama = OllamaController()
         self.voice = VoiceController()
         self.mic = MicController()
         self.input = InputController()
+        self.state = InputControllerStateMachine()
         print("Hello, controller!")
 
-        self.input.mic_input_finished.connect(self.new_story_from_mic)
-        self.input.mic_input_start.connect(self.input.start_listening)
-    
+        self.input.input_emitted.connect(self.handle_input)
+
+    def handle_input(self, key_code):
+        # print(f"Key pressed with code: {key_code}")
+        if (
+            self.state.state == InputControllerState.LISTENING_PROMPT
+            and key_code == InputControllerAction.STOP_LISTENING_PROMPT
+        ):
+            self.state.next_state(InputControllerState.LISTENING_PROMPT_FINISHED)
+            self.ollama.text_to_seech(self.mic.prompt)
+        elif (
+            self.state.state == InputControllerState.IDLE
+            and key_code == InputControllerAction.START_LISTENING_PROMPT
+        ):
+            self.state.next_state(InputControllerState.LISTENING_PROMPT)
+            self.mic.start_listening()
+
+    def on_speech_to_text_available(self):
+        print("Text to speech finished.")
+
+    def on_text_to_speech_available(self):
+        print("Speech to text finished.")
+
     def new_story_from_mic(self):
         print("Creating a new story...")
         # prompt_from_mic = await self.mic.listen_for_prompt()
