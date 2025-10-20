@@ -1,6 +1,7 @@
 import threading
+import time
 
-import keyboard
+from pynput.keyboard import Controller, Listener
 from PySide6.QtCore import QObject, Signal
 
 """
@@ -10,6 +11,7 @@ Class that detects keyboard key presses and emits signals accordingly.
 
 class KeyboardInputController(QObject):
     key_pressed = Signal(int)
+    keyboard = Controller()
 
     def __init__(self):
         super().__init__()
@@ -19,16 +21,25 @@ class KeyboardInputController(QObject):
         self.listener_thread = threading.Thread(target=self.run, daemon=True)
         self.listener_thread.start()
 
+        self.listener = Listener(on_press=self.on_press)
+        self.listener.start()
+
     def stop(self):
+        print("Stopping KeyboardInputController...")
         self.running = False
         self.listener_thread.join()
+        self.listener.stop()
 
     def run(self):
-        map_of_keys = {"s": 0, "d": 1, "f": 2}
         while self.running:
-            key = keyboard.read_key()
-            if key in map_of_keys:
-                self.key_pressed.emit(map_of_keys[key])
+            time.sleep(0.1)
+
+    def on_press(key):
+        # map_of_keys = {"s": 0, "d": 1, "f": 2}
+        try:
+            print("alphanumeric key {0} pressed".format(key.str))
+        except AttributeError:
+            print("special key {0} pressed".format(str(key)))
 
 
 class InputControllerAction:

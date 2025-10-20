@@ -23,13 +23,16 @@ class LuniiController:
             and key_code == InputControllerAction.STOP_LISTENING_PROMPT
         ):
             self.state.next_state(InputControllerState.LISTENING_PROMPT_FINISHED)
-            self.ollama.text_to_seech(self.mic.prompt)
+            # self.ollama.stop_speech_to_text()
+            # text_to_seech(self.mic.prompt)
+
         elif (
             self.state.state == InputControllerState.IDLE
             and key_code == InputControllerAction.START_LISTENING_PROMPT
         ):
             self.state.next_state(InputControllerState.LISTENING_PROMPT)
             self.mic.start_listening()
+            # self.ollama.start_speech_to_text(None)
 
     def on_speech_to_text_available(self):
         print("Text to speech finished.")

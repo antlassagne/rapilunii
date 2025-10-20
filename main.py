@@ -17,6 +17,7 @@ def signal_handler(signum, frame):
     global lunii
     print("\nSignal received, closing application...")
     lunii.input.stop()
+    # lunii.mic.stop()
 
     QApplication.quit()
 

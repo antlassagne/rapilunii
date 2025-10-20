@@ -4,4 +4,12 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "faster-whisper>=1.2.0",
+    "numpy>=2.3.4",
+    "ollama>=0.6.0",
+    "pvrecorder>=1.2.7",
+    "pyaudio>=0.2.14",
+    "pynput>=1.8.1",
+    "pyside6>=6.10.0",
+]
