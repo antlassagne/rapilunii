@@ -1,5 +1,4 @@
 import struct
-import tempfile
 import threading
 import wave
 
@@ -28,8 +27,9 @@ class MicController:
 
     def run(self):
         # Create a temporary file to store the recorded audio (this will be deleted once we've finished transcription)
-        temp_file = tempfile.NamedTemporaryFile(suffix=".wav")
-        print(f"Recording audio to temporary file: {temp_file.name}")
+        # temp_file = tempfile.NamedTemporaryFile(suffix=".wav")
+        # print(f"Recording audio to temporary file: {temp_file.name}")
+        temp_file = "temp_audio.wav"
 
         recorder = PvRecorder(device_index=-1, frame_length=512)
         audio = []
@@ -39,7 +39,9 @@ class MicController:
         while self.running:
             frame = recorder.read()
             audio.extend(frame)
+
         recorder.stop()
+        print("Finished recording audio - saving file")
         with wave.open(temp_file, "w") as f:
             f.setparams((1, 2, 16000, 512, "NONE", "NONE"))
             f.writeframes(struct.pack("h" * len(audio), *audio))

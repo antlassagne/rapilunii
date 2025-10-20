@@ -1,7 +1,7 @@
 import threading
 import time
 
-from pynput.keyboard import Controller, Listener
+from pynput.keyboard import Controller, Key, Listener
 from PySide6.QtCore import QObject, Signal
 
 """
@@ -34,12 +34,15 @@ class KeyboardInputController(QObject):
         while self.running:
             time.sleep(0.1)
 
-    def on_press(key):
+    def on_press(self, key):
         # map_of_keys = {"s": 0, "d": 1, "f": 2}
-        try:
-            print("alphanumeric key {0} pressed".format(key.str))
-        except AttributeError:
-            print("special key {0} pressed".format(str(key)))
+        if key == Key.space:
+            # print("Space key pressed.")
+            self.key_pressed.emit(InputControllerAction.START_LISTENING_PROMPT)
+        # try:
+        #     print("alphanumeric key {0} pressed".format(key.str))
+        # except AttributeError:
+        #     print("special key {0} pressed".format(str(key)))
 
 
 class InputControllerAction:

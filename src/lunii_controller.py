@@ -18,11 +18,12 @@ class LuniiController:
 
     def handle_input(self, key_code):
         # print(f"Key pressed with code: {key_code}")
-        if (
-            self.state.state == InputControllerState.LISTENING_PROMPT
-            and key_code == InputControllerAction.STOP_LISTENING_PROMPT
+        if self.state.state == InputControllerState.LISTENING_PROMPT and (
+            key_code == InputControllerAction.STOP_LISTENING_PROMPT
+            or key_code == InputControllerAction.START_LISTENING_PROMPT
         ):
             self.state.next_state(InputControllerState.LISTENING_PROMPT_FINISHED)
+            self.mic.stop()
             # self.ollama.stop_speech_to_text()
             # text_to_seech(self.mic.prompt)
 
