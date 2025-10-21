@@ -14,9 +14,14 @@ class MicController:
         for i in range(len(devices)):
             print("index: %d, device name: %s" % (i, devices[i]))
         print("Hello MicController!")
+        self.temp_file = ""
+        self.running = False
+        self.is_prompt_available = True
+        self.temp_file = "sample.wav"
 
     def start_listening(self):
         print("Started listening for prompt...")
+        self.is_prompt_available = False
         self.running = True
         self.listener_thread = threading.Thread(target=self.run, daemon=True)
         self.listener_thread.start()
@@ -27,9 +32,9 @@ class MicController:
 
     def run(self):
         # Create a temporary file to store the recorded audio (this will be deleted once we've finished transcription)
-        # temp_file = tempfile.NamedTemporaryFile(suffix=".wav")
+        # self.temp_file = tempfile.NamedTemporaryFile(suffix=".wav")
         # print(f"Recording audio to temporary file: {temp_file.name}")
-        temp_file = "temp_audio.wav"
+        self.temp_file = "temp_audio.wav"
 
         recorder = PvRecorder(device_index=-1, frame_length=512)
         audio = []
@@ -42,9 +47,8 @@ class MicController:
 
         recorder.stop()
         print("Finished recording audio - saving file")
-        with wave.open(temp_file, "w") as f:
+        with wave.open(self.temp_file, "w") as f:
             f.setparams((1, 2, 16000, 512, "NONE", "NONE"))
             f.writeframes(struct.pack("h" * len(audio), *audio))
         recorder.delete()
-
-        # Open the wave file for writing
+        self.is_prompt_available = True

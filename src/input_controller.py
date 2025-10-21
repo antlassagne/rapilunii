@@ -38,7 +38,10 @@ class KeyboardInputController(QObject):
         # map_of_keys = {"s": 0, "d": 1, "f": 2}
         if key == Key.space:
             # print("Space key pressed.")
-            self.key_pressed.emit(InputControllerAction.START_LISTENING_PROMPT)
+            self.key_pressed.emit(InputControllerAction.PROMPT_INPUT_TOGGLE)
+        elif key == Key.shift_l:
+            # print("Left Shift key pressed.")
+            self.key_pressed.emit(InputControllerAction.CREATE_STORY_TOGGLE)
         # try:
         #     print("alphanumeric key {0} pressed".format(key.str))
         # except AttributeError:
@@ -46,8 +49,8 @@ class KeyboardInputController(QObject):
 
 
 class InputControllerAction:
-    START_LISTENING_PROMPT = 0
-    STOP_LISTENING_PROMPT = 1
+    PROMPT_INPUT_TOGGLE = 0
+    CREATE_STORY_TOGGLE = 1
 
 
 class InputController(QObject):

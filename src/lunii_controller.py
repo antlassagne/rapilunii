@@ -19,8 +19,7 @@ class LuniiController:
     def handle_input(self, key_code):
         # print(f"Key pressed with code: {key_code}")
         if self.state.state == InputControllerState.LISTENING_PROMPT and (
-            key_code == InputControllerAction.STOP_LISTENING_PROMPT
-            or key_code == InputControllerAction.START_LISTENING_PROMPT
+            key_code == InputControllerAction.PROMPT_INPUT_TOGGLE
         ):
             self.state.next_state(InputControllerState.LISTENING_PROMPT_FINISHED)
             self.mic.stop()
@@ -29,11 +28,17 @@ class LuniiController:
 
         elif (
             self.state.state == InputControllerState.IDLE
-            and key_code == InputControllerAction.START_LISTENING_PROMPT
+            and key_code == InputControllerAction.PROMPT_INPUT_TOGGLE
         ):
             self.state.next_state(InputControllerState.LISTENING_PROMPT)
             self.mic.start_listening()
             # self.ollama.start_speech_to_text(None)
+        elif (
+            self.mic.is_prompt_available
+            and key_code == InputControllerAction.CREATE_STORY_TOGGLE
+        ):
+            self.state.next_state(InputControllerState.GENERATING_PROMPT)
+            self.new_story_from_mic()
 
     def on_speech_to_text_available(self):
         print("Text to speech finished.")
@@ -43,5 +48,6 @@ class LuniiController:
 
     def new_story_from_mic(self):
         print("Creating a new story...")
+        self.voice.transcribe_audio(self.mic.temp_file)
         # prompt_from_mic = await self.mic.listen_for_prompt()
         # self.ollama.send_prompt("Create a new story")
