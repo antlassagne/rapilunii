@@ -1,43 +1,40 @@
 from ollama import Client
 
+from src.types import ErrorCode
+
 
 class OllamaController:
-    def __init__(self):
+    def __init__(self, host: str):
         print("Hello OllamaController!")
 
-        self.client = Client(
-            host="http://localhost:11434", headers={"x-some-header": "some-value"}
-        )
-        self.story_model = "story-creator-7b"
-        self.stt_model_size = "large-v3"
-        # self.stt_model = WhisperModel(
-        #     self.stt_model_size, device="cuda", compute_type="float16"
-        # )
-        self.preprompt = "You are a creative story writer. Create an engaging and imaginative story based on the following prompt: "
+        self.client = Client(host="{}:11434".format(host))
+
+        # fast, very ad quality
+        # self.story_model = "wizardlm2:7b"
+        # self.story_model = "deepseek-r1"
+
+        self.story_model = "MathiasB/llama3fr"
+        self.story_model = "jobautomation/OpenEuroLLM-French"
+        self.preprompt = "Tu es un conteur d'histoires pour enfants de 3 ans. Crée une histoire captivante et imaginative. L'histoire doit durer 3 minutes. Évidemment tu tutoies l'enfant et tu parles un français correct, bien qu'adapté à cet âge. Pas d'introduction, tu commences l'histoire tout de suite, et n'ajoute rien non plus une fois l'histoire terminée. Donne un titre, mais ne commence pas par 'il était une fois.'. Base toi sur le prompt suivant: "
+
+    def stop(self):
+        print("Stopping OllamaController...")
+        # stop ollama generation if possible
 
     def text_to_seech(self, text):
         print(f"Converting text to speech: {text}")
 
-    def start_speech_to_text(self, audio):
-        # segments, info = self.stt_model.transcribe("audio.mp3", beam_size=5)
-
-        # print(
-        #     "Detected language '%s' with probability %f"
-        #     % (info.language, info.language_probability)
-        # )
-
-        # for segment in segments:
-        #     print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
-        pass
-
-    def get_story(self, prompt):
+    def generate_story(self, prompt):
         print(f"Getting story for prompt: {prompt}")
-        # response = self.client.chat(
-        #     model=self.story_model,
-        #     messages=[
-        #         {
-        #             "role": "user",
-        #             "content": self.preprompt + prompt,
-        #         },
-        #     ],
-        # )
+        story = ""
+        for chunk in self.client.generate(
+            model=self.story_model,
+            prompt=self.preprompt + prompt,
+            stream=True,
+        ):
+            # print(chunk)
+            # print(type(chunk))
+            print(".", end="", flush=True)
+            story += chunk["response"]
+        print("Ollama > Story generation complete: ", story)
+        return story, ErrorCode.SUCCESS
