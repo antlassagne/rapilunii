@@ -44,36 +44,16 @@ repos:
     - --exclude
     - tests/.*
     - --exclude
-    - docs/.*
+    - hardware/.*
     - --exclude
-    - hatch_build.py
-    - --exclude
-    - yarf/vendor/.*
+    - src/external/.*
     - .
-
-- repo: https://github.com/MarketSquare/robotframework-tidy
-  rev: 4.16.0
-  hooks:
-  - id: robotidy
-    args:
-    - --configure
-    - RenameTestCases:enabled=true
-    - --configure
-    - RenameVariables:enabled=true
-    - --configure
-    - IndentNestedKeywords:enabled=true
-    - --configure
-    - AlignKeywordsSection:enabled=true
-    - --configure
-    - AlignTestCasesSection:enabled=true
-    - --configure
-    - AlignTemplatedTestCases:enabled=true
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.11.0
   hooks:
   - id: ruff
-    args: [ --fix ]
+    args: [ --fix, --extend-exclude, hardware/*, --extend-exclude, src/external/* ]
   - id: ruff-format
 
 - repo: https://github.com/PyCQA/docformatter
@@ -100,7 +80,7 @@ repos:
   rev: 0.6.2
   hooks:
   - id: pydoclint
-    exclude: 'tests/.*'
+    exclude: 'src/external/.*|hardware/.*'
     args: [
       --style=google,
       --skip-checking-short-docstrings=False,
@@ -108,7 +88,7 @@ repos:
       --check-return-types=False,
       --check-yield-types=False,
       --baseline=pydoclint-baseline.txt,
-      --generate-baseline=True,
+      # --generate-baseline=True,
     ]
   - id: pydoclint
     files: 'tests/.*'
