@@ -39,6 +39,12 @@ class LuniiController:
 
         self.input.input_emitted.connect(self.handle_input)
 
+        # connect ollama signals to warn us whenever a written sntence is ready
+        self.ollama.story_chunk_ready.connect(self.on_story_chunk_available)
+
+        # connect voice signals to warn us whenever tts .wav file is ready
+        self.voice.tts_ready.connect(self.on_story_tts_available)
+
     def handle_input(self, key_code):
         # print(f"Key pressed with code: {key_code}")
         if self.state.state == InputControllerState.LISTENING_PROMPT and (
@@ -63,24 +69,27 @@ class LuniiController:
             self.state.next_state(InputControllerState.GENERATING_PROMPT)
             self.new_story_from_mic()
 
-    def on_speech_to_text_available(self):
-        print("Text to speech finished.")
+    def on_story_tts_available(self, story_tts_filepath):
+        print("Story TTS available: {}".format(story_tts_filepath))
+        self.voice.push_to_playback_queue(story_tts_filepath)
 
-    def on_text_to_speech_available(self):
-        print("Speech to text finished.")
+    def on_story_chunk_available(self, story_chunk):
+        print("New story chunk available: {}".format(story_chunk))
+        # remove the \n characters
+        story_chunk = story_chunk.replace("\n", " ")
+        self.voice.push_to_tts_queue(story_chunk)
 
-    def new_story_from_mic(self):
+    def new_story_from_mic(self, async_mode: bool = False):
         print("Creating a new story...")
+
         input_text = self.voice.transcribe_audio(self.mic.temp_file)
         story, error = self.ollama.generate_story(input_text)
         if error != ErrorCode.SUCCESS:
             print("Failed to generate the image.")
             return
-
-        # remove the \n characters
-        story = story.replace("\n", " ")
-
-        self.voice.text_to_speech(story, "story.wav")
-
-        # play the audio story
-        self.voice.play_audio_file("story.wav")
+        if not async_mode:
+            print("Generated TTS all at once: {}".format(story))
+            self.on_story_chunk_available(story)
+        else:
+            print("Generating TTS asynchronously...")
+            # the connected signal will handle the rest

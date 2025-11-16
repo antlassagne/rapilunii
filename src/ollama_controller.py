@@ -11,7 +11,7 @@ MINIMUM_SENTENCE_LENGTH = 20
 
 class OllamaController(QObject):
     # Signal emitted when a new story chunk is ready in async mode
-    story_chunk = Signal(str)
+    story_chunk_ready = Signal(str)
 
     # contains the story chunk that is ready to be published, or None
     story_to_publish = None
@@ -43,7 +43,7 @@ class OllamaController(QObject):
     def refine_and_publish_story_if_ready(self):
         if self.refine_story():
             print("\nOllama > Story chunk ready: ", self.story_to_publish)
-            self.story_chunk.emit(self.story_to_publish)
+            self.story_chunk_ready.emit(self.story_to_publish)
             self.story_to_publish = None
 
     def refine_story(self):
