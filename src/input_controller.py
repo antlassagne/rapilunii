@@ -1,12 +1,16 @@
 import threading
 import time
 
+from gpiozero import Button
 from pynput.keyboard import Controller, Key, Listener
 from PySide6.QtCore import QObject, Signal
 
 """
 Class that detects keyboard key presses and emits signals accordingly.
 """
+
+LEFT_BUTTON_ID = 0
+RIGHT_BUTTON_ID = 1
 
 
 class KeyboardInputController(QObject):
@@ -17,12 +21,28 @@ class KeyboardInputController(QObject):
         super().__init__()
         print("Hello KeyboardInputController!")
 
+        is_running_on_respberry_pi = False
+
         self.running = True
         self.listener_thread = threading.Thread(target=self.run, daemon=True)
         self.listener_thread.start()
 
         self.listener = Listener(on_press=self.on_press)
         self.listener.start()
+
+        if is_running_on_respberry_pi:
+            left_button = Button(LEFT_BUTTON_ID)
+            right_button = Button(RIGHT_BUTTON_ID)
+
+            left_button.when_released = self.on__left_button_released
+            right_button.when_released = self.on_right_button_released
+            # left_button.when_held = self.on_button_held
+
+    def on__left_button_released(self):
+        print("Left button released.")
+
+    def on_right_button_released(self):
+        print("Right button released.")
 
     def stop(self):
         print("Stopping KeyboardInputController...")

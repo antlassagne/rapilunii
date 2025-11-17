@@ -16,8 +16,7 @@ class MicController:
         print("Hello MicController!")
         self.temp_file = ""
         self.running = False
-        self.is_prompt_available = True
-        self.temp_file = "sample.wav"
+        self.is_prompt_available = False
 
     def start_listening(self):
         print("Started listening for prompt...")

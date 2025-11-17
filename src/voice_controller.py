@@ -95,7 +95,7 @@ class VoiceController(QObject):
 
         print(f" > TTS output saved to: {output_file}")
 
-    def transcribe_audio(self, audio_file_path) -> str:
+    def speech_to_text(self, audio_file_path) -> str:
         # or run on GPU with INT8
         # model = WhisperModel(model_size, device="cuda", compute_type="int8_float16")
         # or run on CPU with INT8

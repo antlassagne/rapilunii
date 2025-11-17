@@ -19,6 +19,8 @@ class OllamaController(QObject):
     # contains the current story being generated
     story = ""
 
+    running = False
+
     def __init__(self, host: str):
         super().__init__()
         print("Hello OllamaController!")
@@ -68,6 +70,7 @@ class OllamaController(QObject):
         return False
 
     def generate_story(self, prompt, async_mode: bool = False):
+        print("Generating story for prompt: {}".format(prompt))
         if self.running:
             print("Story generation already in progress.")
             return "", ErrorCode.BUSY
