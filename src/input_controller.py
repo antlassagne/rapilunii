@@ -1,3 +1,4 @@
+import logging
 import threading
 import time
 
@@ -19,7 +20,7 @@ class KeyboardInputController(QObject):
 
     def __init__(self):
         super().__init__()
-        print("Hello KeyboardInputController!")
+        logging.info("Hello KeyboardInputController!")
 
         is_running_on_respberry_pi = False
 
@@ -36,16 +37,31 @@ class KeyboardInputController(QObject):
 
             left_button.when_released = self.on__left_button_released
             right_button.when_released = self.on_right_button_released
+            left_button.when_held = self.on__left_button_held
+            right_button.when_held = self.on_right_button_held
             # left_button.when_held = self.on_button_held
 
     def on__left_button_released(self):
-        print("Left button released.")
+        logging.info("Left button released.")
+        # start listening for prompt in both story and conversation mode.
+        # stop listening when pressed again.
+        # start story generation or listening whenever prompt is available.
+        # pause/restart the story playback if any.
 
     def on_right_button_released(self):
-        print("Right button released.")
+        logging.info("Right button released.")
+        # switch between story mode and conversation mode
+
+    def on__left_button_held(self):
+        logging.info("Left button held.")
+        # Stop everything, cancel listened prompt.
+
+    def on_right_button_held(self):
+        logging.info("Right button held.")
+        # trigger the display to show logs instead of nice stuff
 
     def stop(self):
-        print("Stopping KeyboardInputController...")
+        logging.info("Stopping KeyboardInputController...")
         self.running = False
         self.listener_thread.join()
         self.listener.stop()
@@ -57,15 +73,15 @@ class KeyboardInputController(QObject):
     def on_press(self, key):
         # map_of_keys = {"s": 0, "d": 1, "f": 2}
         if key == Key.space:
-            # print("Space key pressed.")
+            # logging.info("Space key pressed.")
             self.key_pressed.emit(InputControllerAction.PROMPT_INPUT_TOGGLE)
         elif key == Key.shift_l:
-            # print("Left Shift key pressed.")
+            # logging.info("Left Shift key pressed.")
             self.key_pressed.emit(InputControllerAction.CREATE_STORY_TOGGLE)
         # try:
-        #     print("alphanumeric key {0} pressed".format(key.str))
+        #     logging.info("alphanumeric key {0} pressed".format(key.str))
         # except AttributeError:
-        #     print("special key {0} pressed".format(str(key)))
+        #     logging.info("special key {0} pressed".format(str(key)))
 
 
 class InputControllerAction:
@@ -82,9 +98,9 @@ class InputController(QObject):
         self.keyboard = KeyboardInputController()
         # Connect the signal before starting the keyboard
         if not self.keyboard.key_pressed.connect(self.handle_key_press):
-            print("Failed to connect keyboard signal.")
+            logging.info("Failed to connect keyboard signal.")
         self.keyboard.key_pressed.emit(9)
-        print("Hello InputController!")
+        logging.info("Hello InputController!")
 
     def stop(self):
         self.keyboard.stop()

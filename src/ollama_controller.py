@@ -1,3 +1,4 @@
+import logging
 import threading
 
 from ollama import Client
@@ -23,7 +24,7 @@ class OllamaController(QObject):
 
     def __init__(self, host: str):
         super().__init__()
-        print("Hello OllamaController!")
+        logging.info("Hello OllamaController!")
 
         self.client = Client(host="{}:11434".format(host))
 
@@ -36,21 +37,21 @@ class OllamaController(QObject):
         self.preprompt = "Tu es un conteur d'histoires pour enfants de 3 ans. Crée une histoire captivante et imaginative. L'histoire doit durer 3 minutes. Évidemment tu tutoies l'enfant et tu parles un français correct, bien qu'adapté à cet âge. Pas d'introduction, tu commences l'histoire tout de suite, et n'ajoute rien non plus une fois l'histoire terminée. Donne un titre, mais ne commence pas par 'il était une fois.'. Base toi sur le prompt suivant: "
 
     def stop(self):
-        print("Stopping OllamaController...")
+        logging.info("Stopping OllamaController...")
         # stop ollama generation if possible
 
     def text_to_seech(self, text):
-        print(f"Converting text to speech: {text}")
+        logging.info(f"Converting text to speech: {text}")
 
     def refine_and_publish_story_if_ready(self):
         if self.refine_story():
-            print("\nOllama > Story chunk ready: ", self.story_to_publish)
+            logging.info("Story chunk ready: {}".format(self.story_to_publish))
             self.story_chunk_ready.emit(self.story_to_publish)
             self.story_to_publish = None
 
     def refine_story(self):
         if self.story_to_publish is not None:
-            print(
+            logging.info(
                 "There is already a story chunk ready to publish: {}".format(
                     self.story_to_publish
                 )
@@ -62,17 +63,18 @@ class OllamaController(QObject):
             )
 
         for splitter in SENTENCES_SPLITTERS:
-            if splitter in self.story and len(self.story) >= MINIMUM_SENTENCE_LENGTH:
+            if splitter in self.story:
                 split_index = self.story.rfind(splitter) + 1
-                self.story_to_publish = self.story[:split_index].strip()
-                self.story = self.story[split_index:].strip()
-                return True
+                if len(self.story[:split_index].strip()) >= MINIMUM_SENTENCE_LENGTH:
+                    self.story_to_publish = self.story[:split_index].strip()
+                    self.story = self.story[split_index:].strip()
+                    return True
         return False
 
     def generate_story(self, prompt, async_mode: bool = False):
-        print("Generating story for prompt: {}".format(prompt))
+        logging.info("Generating story for prompt: {}".format(prompt))
         if self.running:
-            print("Story generation already in progress.")
+            logging.info("Story generation already in progress.")
             return "", ErrorCode.BUSY
         if async_mode:
             self.generation_thread = threading.Thread(
@@ -85,21 +87,23 @@ class OllamaController(QObject):
 
     def generate_story_worker(self, prompt, async_mode: bool = False):
         self.running = True
-        print(f"Getting story for prompt: {prompt}")
+        logging.info(f"Getting story for prompt: {prompt}")
         self.story = ""
+        untouched_story = ""
         for chunk in self.client.generate(
             model=self.story_model,
             prompt=self.preprompt + prompt,
             stream=True,
         ):
-            # print(chunk)
-            # print(type(chunk))
+            # logging.info(chunk)
+            # logging.info(type(chunk))
             print(".", end="", flush=True)
             story_chunk = chunk["response"]
             self.story += story_chunk
+            untouched_story += story_chunk
             if async_mode:
                 self.refine_and_publish_story_if_ready()
 
-        print("Ollama > Story generation complete: ", self.story)
+        logging.info("Story generation complete: {}".format(untouched_story))
         self.running = False
         return self.story, ErrorCode.SUCCESS

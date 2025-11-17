@@ -8,7 +8,7 @@ from src.external.LCD_2inch import LCD_2inch
 
 class DisplayController:
     def __init__(self):
-        print("Hello DisplayController!")
+        logging.info("Hello DisplayController!")
 
         logging.basicConfig(level=logging.DEBUG)
         try:
@@ -75,4 +75,4 @@ class DisplayController:
 
     def __del__(self):
         self.disp.module_exit()
-        print("DisplayController destructor called.")
+        logging.info("DisplayController destructor called.")

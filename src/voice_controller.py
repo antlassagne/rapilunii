@@ -1,3 +1,4 @@
+import logging
 import threading
 import time
 from queue import Queue
@@ -33,27 +34,27 @@ class VoiceController(QObject):
             target=self.playback_worker, daemon=True
         )
         self.playback_thread.start()
-        print("Hello VoiceController!")
+        logging.info("Hello VoiceController!")
 
     def __del__(self):
         self.stop()
 
     def stop(self):
-        print("Stopping VoiceController...", end="", flush=True)
+        logging.info("Stopping VoiceController...")
         self.running = False
         self.tts_thread.join()
         self.playback_thread.join()
-        print(" done.")
+        logging.info(" done.")
 
     def push_to_tts_queue(self, text: str):
-        print("> TTS queuing text: {}".format(text))
+        logging.info("> TTS queuing text: {}".format(text))
         self.tts_queue.put(text)
-        print("> TTS queue size: {}".format(self.tts_queue.qsize()))
+        logging.info("> TTS queue size: {}".format(self.tts_queue.qsize()))
 
     def push_to_playback_queue(self, audio_file_path: str):
-        print("> Playback queuing audio file: {}".format(audio_file_path))
+        logging.info("> Playback queuing audio file: {}".format(audio_file_path))
         self.playback_queue.put(audio_file_path)
-        print("> Playback queue size: {}".format(self.playback_queue.qsize()))
+        logging.info("> Playback queue size: {}".format(self.playback_queue.qsize()))
 
     def tts_worker(self):
         id = 0
@@ -64,7 +65,7 @@ class VoiceController(QObject):
 
             text = self.tts_queue.get()
             id = id + 1
-            print("> TTS worker got text: {}".format(text))
+            logging.info("> TTS worker got text: {}".format(text))
             output_file = "story_chunk_{}.wav".format(id)
             self.text_to_speech(text, output_file)
             self.tts_ready.emit(output_file)
@@ -76,12 +77,12 @@ class VoiceController(QObject):
                 time.sleep(1)
                 continue
             audio_file_path = self.playback_queue.get()
-            print("> Playback worker got audio file: {}".format(audio_file_path))
+            logging.info("> Playback worker got audio file: {}".format(audio_file_path))
             self.play_audio_file(audio_file_path)
             self.playback_queue.task_done()
 
     def text_to_speech(self, text: str, output_file: str):
-        print("> TTS starting TTS request")
+        logging.info("> TTS starting TTS request")
         headers = {
             # "text": text,
             # "speaker-id": "0",
@@ -93,7 +94,7 @@ class VoiceController(QObject):
         with open(output_file, "wb") as f:
             f.write(response.content)
 
-        print(f" > TTS output saved to: {output_file}")
+        logging.info(f" > TTS output saved to: {output_file}")
 
     def speech_to_text(self, audio_file_path) -> str:
         # or run on GPU with INT8
@@ -105,22 +106,23 @@ class VoiceController(QObject):
             audio_file_path, language="fr", beam_size=5
         )
 
-        print(
+        logging.info(
             "Whisper > Detected language '%s' with probability %f"
             % (info.language, info.language_probability)
         )
 
         transcription = ""
         for segment in segments:
-            print(
+            logging.info(
                 "Whisper > [%.2fs -> %.2fs] %s"
                 % (segment.start, segment.end, segment.text)
             )
             transcription = segment.text + " "
 
-        print("Whisper > Transcription complete.")
+        logging.info("Whisper > Transcription complete.")
         return transcription
 
     def play_audio_file(self, audio_file_path: str):
-        print(f"Playing audio file: {audio_file_path}")
-        play(audio_file_path, async_mode=True)
+        logging.info(f"Playing audio file: {audio_file_path}")
+        play(audio_file_path, async_mode=False)
+        time.sleep(1)  # small delay to ensure smooth playback
