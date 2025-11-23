@@ -1,6 +1,7 @@
 import logging
 import threading
 import time
+from enum import Enum
 from queue import Queue
 
 import requests  # type: ignore
@@ -8,9 +9,18 @@ from faster_whisper import WhisperModel
 from nava import play
 from PySide6.QtCore import QObject, Signal
 
+from alltalk_controller import AllTalkController
+
+
+class TTS_IMPL(Enum):
+    ALLTALK = ((0,),)
+    COQUI = 1
+
 
 class VoiceController(QObject):
     tts_ready = Signal(str)
+
+    tts_mode = TTS_IMPL.ALLTALK  # alltalk
 
     # Queue for TTS worker
     tts_queue: Queue = Queue(maxsize=1000)
@@ -26,6 +36,8 @@ class VoiceController(QObject):
         # self.model = WhisperModel(model_size, device="cuda", compute_type="float16")
         self.model = WhisperModel(model_size, device="cpu", compute_type="float32")
         self.tts_server = "{}:5002/api/tts".format(host)
+
+        self.alltalk_controller = AllTalkController()
 
         self.running = True
         self.tts_thread = threading.Thread(target=self.tts_worker, daemon=True)
@@ -83,16 +95,27 @@ class VoiceController(QObject):
 
     def text_to_speech(self, text: str, output_file: str):
         logging.info("> TTS starting TTS request")
-        headers = {
-            # "text": text,
-            # "speaker-id": "0",
-            "language-id": "fr",
-            "style-wav": "",
-        }
-        params = {"text": text}
-        response = requests.post(self.tts_server, headers=headers, params=params)
-        with open(output_file, "wb") as f:
-            f.write(response.content)
+
+        if self.tts_mode == TTS_IMPL.ALLTALK:
+            _ = self.alltalk_controller.generate_tts(
+                "Bonjour, ceci est un test de synthèse vocale.",
+                character_voice="female_01.wav",
+                language="fr",
+                output_file_name="test_output",
+                output_file=output_file,
+            )
+
+        else:
+            headers = {
+                # "text": text,
+                # "speaker-id": "0",
+                "language-id": "fr",
+                "style-wav": "",
+            }
+            params = {"text": text}
+            response = requests.post(self.tts_server, headers=headers, params=params)
+            with open(output_file, "wb") as f:
+                f.write(response.content)
 
         logging.info(f" > TTS output saved to: {output_file}")
 
