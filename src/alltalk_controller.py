@@ -82,7 +82,7 @@ class AllTalkController:
         AllTalkAPI.
 
         Returns:
-            bool: True if initialization is successful, False otherwise.
+            bool : True if initialization is successful, False otherwise.
         """
         if not self.check_server_ready():
             print("Server is offline or not responding.")
@@ -191,9 +191,10 @@ class AllTalkController:
         response = requests.post(f"{self.base_url}/api/tts-generate", data=data)
         result = response.json() if response.status_code == 200 else None
         if result:
-            logging.info(f"\nTTS generated: {result['output_file_url']}")
+            logging.info(f"TTS json: {result}")
+            logging.info(f"TTS generated: {result['output_file_url']}")
             # download the generated audio file
-            response = requests.get(result["output_file_url"])
+            response = requests.get(f"{self.base_url}/{result['output_file_url']}")
             if response.status_code == 200:
                 with open(output_file, "wb") as f:
                     f.write(response.content)
@@ -282,20 +283,20 @@ class AllTalkController:
         This includes current settings, available voices, RVC voices,
         and server capabilities.
         """
-        print("=== AllTalk Server Information ===")
+        logging.info("=== AllTalk Server Information ===")
 
-        print(f"\nServer URL: {self.base_url}")
+        logging.info(f"\nServer URL: {self.base_url}")
 
-        print("\n--- Current Settings ---")
-        pprint(self.current_settings)
+        logging.info("\n--- Current Settings ---")
+        logging.info(self.current_settings)
 
-        print("\n--- Available Voices ---")
-        pprint(self.available_voices)
+        logging.info("\n--- Available Voices ---")
+        logging.info(self.available_voices)
 
-        print("\n--- Available RVC Voices ---")
-        pprint(self.available_rvc_voices)
+        logging.info("\n--- Available RVC Voices ---")
+        logging.info(self.available_rvc_voices)
 
-        print("\n--- Server Capabilities ---")
+        logging.info("\n--- Server Capabilities ---")
         if self.current_settings:
             capabilities = {
                 "DeepSpeed Capable": self.current_settings.get(

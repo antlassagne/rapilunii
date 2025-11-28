@@ -9,7 +9,7 @@ from faster_whisper import WhisperModel
 from nava import play
 from PySide6.QtCore import QObject, Signal
 
-from alltalk_controller import AllTalkController
+from src.alltalk_controller import AllTalkController
 
 
 class TTS_IMPL(Enum):
@@ -98,8 +98,8 @@ class VoiceController(QObject):
 
         if self.tts_mode == TTS_IMPL.ALLTALK:
             _ = self.alltalk_controller.generate_tts(
-                "Bonjour, ceci est un test de synthèse vocale.",
-                character_voice="female_01.wav",
+                text,
+                character_voice="female_06.wav",
                 language="fr",
                 output_file_name="test_output",
                 output_file=output_file,
