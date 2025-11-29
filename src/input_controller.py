@@ -1,9 +1,10 @@
 import logging
 import threading
 import time
+from enum import Enum
 
 from gpiozero import Button
-from pynput.keyboard import Controller, Key, Listener
+from pynput.keyboard import Controller, KeyCode, Listener
 from PySide6.QtCore import QObject, Signal
 
 """
@@ -12,6 +13,7 @@ Class that detects keyboard key presses and emits signals accordingly.
 
 LEFT_BUTTON_ID = 0
 RIGHT_BUTTON_ID = 1
+MIDDLE_BUTTON_ID = 2
 
 
 class KeyboardInputController(QObject):
@@ -34,31 +36,65 @@ class KeyboardInputController(QObject):
         if is_running_on_respberry_pi:
             left_button = Button(LEFT_BUTTON_ID)
             right_button = Button(RIGHT_BUTTON_ID)
+            middle_button = Button(MIDDLE_BUTTON_ID)
 
             left_button.when_released = self.on__left_button_released
             right_button.when_released = self.on_right_button_released
+            middle_button.when_released = self.on_middle_button_released
             left_button.when_held = self.on__left_button_held
             right_button.when_held = self.on_right_button_held
-            # left_button.when_held = self.on_button_held
+            middle_button.when_held = self.on_middle_button_held
+
+    ## double click implementation
+    # from datetime import datetime, timedelta
+
+    # Button.pressed_time = None
+
+    # def pressed(btn):
+    #     if btn.pressed_time:
+    #         if btn.pressed_time + timedelta(seconds=0.6) > datetime.now():
+    #             print("pressed twice")
+    #         else:
+    #             print("too slow") # debug
+    #         btn.pressed_time = None
+    #     else:
+    #         print("pressed once")  # debug
+    #         btn.pressed_time = datetime.now()
+
+    # btn = Button(3)
+    # btn.when_pressed = pressed
 
     def on__left_button_released(self):
         logging.info("Left button released.")
+        self.key_pressed.emit(INPUT_CONTROLLER_ACTION.LEFT_BUTTON_TOGGLE)
+
+    def on_right_button_released(self):
+        logging.info("Right button released.")
+        self.key_pressed.emit(INPUT_CONTROLLER_ACTION.RIGHT_BUTTON_TOGGLE)
+        # pick menu item or validate choice
         # start listening for prompt in both story and conversation mode.
         # stop listening when pressed again.
         # start story generation or listening whenever prompt is available.
         # pause/restart the story playback if any.
 
-    def on_right_button_released(self):
-        logging.info("Right button released.")
-        # switch between story mode and conversation mode
+    def on_middle_button_released(self):
+        logging.info("Middle button released.")
+        self.key_pressed.emit(INPUT_CONTROLLER_ACTION.MIDDLE_BUTTON_TOGGLE)
+        # switch between logs and normal display mode
 
-    def on__left_button_held(self):
+    def on_left_button_held(self):
         logging.info("Left button held.")
+        self.key_pressed.emit(INPUT_CONTROLLER_ACTION.LEFT_BUTTON_HELD)
         # Stop everything, cancel listened prompt.
 
     def on_right_button_held(self):
         logging.info("Right button held.")
-        # trigger the display to show logs instead of nice stuff
+        self.key_pressed.emit(INPUT_CONTROLLER_ACTION.RIGHT_BUTTON_HELD)
+
+    def on_middle_button_held(self):
+        logging.info("Middle button held.")
+        self.key_pressed.emit(INPUT_CONTROLLER_ACTION.MIDDLE_BUTTON_HELD)
+        # reboot the device
 
     def stop(self):
         logging.info("Stopping KeyboardInputController...")
@@ -72,21 +108,34 @@ class KeyboardInputController(QObject):
 
     def on_press(self, key):
         # map_of_keys = {"s": 0, "d": 1, "f": 2}
-        if key == Key.space:
-            # logging.info("Space key pressed.")
-            self.key_pressed.emit(InputControllerAction.PROMPT_INPUT_TOGGLE)
-        elif key == Key.shift_l:
-            # logging.info("Left Shift key pressed.")
-            self.key_pressed.emit(InputControllerAction.CREATE_STORY_TOGGLE)
-        # try:
-        #     logging.info("alphanumeric key {0} pressed".format(key.str))
-        # except AttributeError:
-        #     logging.info("special key {0} pressed".format(str(key)))
+        if isinstance(key, KeyCode):
+            if key.char == "s":
+                logging.info("left key pressed.")
+                self.key_pressed.emit(INPUT_CONTROLLER_ACTION.LEFT_BUTTON_TOGGLE)
+            elif key.char == "d":
+                logging.info("middle key pressed.")
+                self.key_pressed.emit(INPUT_CONTROLLER_ACTION.MIDDLE_BUTTON_TOGGLE)
+            elif key.char == "f":
+                logging.info("right key pressed.")
+                self.key_pressed.emit(INPUT_CONTROLLER_ACTION.RIGHT_BUTTON_TOGGLE)
+            elif key.char == "x":
+                logging.info("left key held.")
+                self.key_pressed.emit(INPUT_CONTROLLER_ACTION.LEFT_BUTTON_HELD)
+            elif key.char == "c":
+                logging.info("middle key held.")
+                self.key_pressed.emit(INPUT_CONTROLLER_ACTION.MIDDLE_BUTTON_HELD)
+            elif key.char == "v":
+                logging.info("right key held.")
+                self.key_pressed.emit(INPUT_CONTROLLER_ACTION.RIGHT_BUTTON_HELD)
 
 
-class InputControllerAction:
-    PROMPT_INPUT_TOGGLE = 0
-    CREATE_STORY_TOGGLE = 1
+class INPUT_CONTROLLER_ACTION(Enum):
+    LEFT_BUTTON_TOGGLE = 0
+    MIDDLE_BUTTON_TOGGLE = 1
+    RIGHT_BUTTON_TOGGLE = 2
+    LEFT_BUTTON_HELD = 3
+    MIDDLE_BUTTON_HELD = 4
+    RIGHT_BUTTON_HELD = 5
 
 
 class InputController(QObject):

@@ -36,6 +36,14 @@ sudo snap install ollama
 sudo apt-get install portaudio19-dev ffmpeg
 ```
 
+## Step 1: STT setting
+
+```
+git clone https://github.com/joshuaboniface/remote-faster-whisper
+cd remote-faster-whisper
+sudo ./setup.sh
+```
+
 ## TTS setting
 
 ### Coqui (testing impl, not the right one)

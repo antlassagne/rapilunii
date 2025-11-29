@@ -1,7 +1,6 @@
 import json
 import logging
 import time
-from pprint import pprint
 
 import requests  # type: ignore
 
@@ -23,7 +22,7 @@ class AllTalkController:
             with open(config_file, "r") as f:
                 self.config = json.load(f)
         except FileNotFoundError:
-            print(
+            logging.info(
                 f"Config file '{config_file}' not found. Using default configuration."
             )
             self.config = default_config
@@ -48,9 +47,9 @@ class AllTalkController:
 
         # Enable DeepSpeed for optimized performance
         if self.set_deepspeed(True):
-            print("DeepSpeed enabled.")
+            logging.info("DeepSpeed enabled.")
         else:
-            print("Failed to enable DeepSpeed.")
+            logging.info("Failed to enable DeepSpeed.")
 
     def check_server_ready(self):
         """
@@ -85,7 +84,7 @@ class AllTalkController:
             bool : True if initialization is successful, False otherwise.
         """
         if not self.check_server_ready():
-            print("Server is offline or not responding.")
+            logging.info("Server is offline or not responding.")
             return False
 
         self.current_settings = self.get_current_settings()
@@ -106,7 +105,7 @@ class AllTalkController:
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
-            print(f"Error fetching current settings: {e}")
+            logging.info(f"Error fetching current settings: {e}")
             return None
 
     def get_available_voices(self):
@@ -122,7 +121,7 @@ class AllTalkController:
             data = response.json()
             return data.get("voices", [])
         except requests.RequestException as e:
-            print(f"Error fetching available voices: {e}")
+            logging.info(f"Error fetching available voices: {e}")
             return None
 
     def get_available_rvc_voices(self):
@@ -141,7 +140,7 @@ class AllTalkController:
             data = response.json()
             return data.get("rvcvoices", [])
         except requests.RequestException as e:
-            print(f"Error fetching available RVC voices: {e}")
+            logging.info(f"Error fetching available RVC voices: {e}")
             return None
 
     def reload_config(self):
@@ -233,13 +232,15 @@ class AllTalkController:
             response.raise_for_status()  # This will raise an exception for HTTP errors
             return response.json()
         except requests.RequestException as e:
-            print(f"Error switching model: {e}")
+            logging.info(f"Error switching model: {e}")
             if response.status_code == 404:
-                print(f"Model '{model_name}' not found on the server.")
+                logging.info(f"Model '{model_name}' not found on the server.")
             elif response.status_code == 500:
-                print("Server encountered an error while switching models.")
+                logging.info("Server encountered an error while switching models.")
             else:
-                print(f"Unexpected error occurred. Status code: {response.status_code}")
+                logging.info(
+                    f"Unexpected error occurred. Status code: {response.status_code}"
+                )
             return None
 
     def set_deepspeed(self, enabled: bool):
@@ -283,20 +284,20 @@ class AllTalkController:
         This includes current settings, available voices, RVC voices,
         and server capabilities.
         """
-        logging.info("=== AllTalk Server Information ===")
+        logging.debug("=== AllTalk Server debugrmation ===")
 
-        logging.info(f"\nServer URL: {self.base_url}")
+        logging.debug(f"\nServer URL: {self.base_url}")
 
-        logging.info("\n--- Current Settings ---")
-        logging.info(self.current_settings)
+        logging.debug("\n--- Current Settings ---")
+        logging.debug(self.current_settings)
 
-        logging.info("\n--- Available Voices ---")
-        logging.info(self.available_voices)
+        logging.debug("\n--- Available Voices ---")
+        logging.debug(self.available_voices)
 
-        logging.info("\n--- Available RVC Voices ---")
-        logging.info(self.available_rvc_voices)
+        logging.debug("\n--- Available RVC Voices ---")
+        logging.debug(self.available_rvc_voices)
 
-        logging.info("\n--- Server Capabilities ---")
+        logging.debug("\n--- Server Capabilities ---")
         if self.current_settings:
             capabilities = {
                 "DeepSpeed Capable": self.current_settings.get(
@@ -334,9 +335,9 @@ class AllTalkController:
                     "languages_capable", False
                 ),
             }
-            pprint(capabilities)
+            logging.debug(capabilities)
         else:
-            print(
+            logging.debug(
                 "Server settings not available. Make sure the server is running and accessible."
             )
 
@@ -348,7 +349,7 @@ class AllTalkController:
 
 #     # Initialize the API and fetch server information
 #     if api.initialize():
-#         print("AllTalk API initialized successfully.")
+#         logging.info("AllTalk API initialized successfully.")
 
 #         # Display all server information
 #         api.display_server_info()
@@ -361,29 +362,29 @@ class AllTalkController:
 #             output_file_name="test_output",
 #         )
 #         if result:
-#             print(f"\nTTS generated: {result['output_file_url']}")
+#             logging.info(f"\nTTS generated: {result['output_file_url']}")
 #         else:
-#             print("Failed to generate TTS.")
+#             logging.info("Failed to generate TTS.")
 
 #         # Switch to a different TTS model
-#         print("\nAttempting to switch TTS model...")
+#         logging.info("\nAttempting to switch TTS model...")
 #         available_models = api.current_settings.get("models_available", [])
 #         if available_models:
 #             target_model = available_models[0][
 #                 "name"
 #             ]  # Choose the first available model
 #             if api.switch_model(target_model):
-#                 print(f"Model switched successfully to {target_model}.")
+#                 logging.info(f"Model switched successfully to {target_model}.")
 #             else:
-#                 print(f"Failed to switch to model {target_model}.")
+#                 logging.info(f"Failed to switch to model {target_model}.")
 #         else:
-#             print("No available models found. Cannot switch model.")
+#             logging.info("No available models found. Cannot switch model.")
 
 #     #     # Reload config and display updated information
 #     #     if api.reload_config():
-#     #         print("\nConfiguration reloaded. Updated server information:")
+#     #         logging.info("\nConfiguration reloaded. Updated server information:")
 #     #         api.display_server_info()
 #     #     else:
-#     #         print("Failed to reload configuration.")
+#     #         logging.info("Failed to reload configuration.")
 #     # else:
-#     #     print("Failed to initialize AllTalk API.")
+#     #     logging.info("Failed to initialize AllTalk API.")
