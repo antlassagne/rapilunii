@@ -34,3 +34,16 @@ aplay -D "plughw:1,0" test.wav
 https://www.waveshare.com/wiki/2inch_LCD_Module
 
 Running it the python way is fine. No need for fancy stuff. See the examples.
+
+### Pinout
+
+- I plugged the LCD display where it should be with no consideration to the keyestudio hat whatsoever. The hat's leds pins are overlapping on the SPI, so whenever using the LCD display the hat's led are always on (white).
+  ![LCD Pinout](lcd-pinout.jpg)
+
+- The 3 pushbuttons are on pins
+
+  - GPIO16 (pin 36), GND (pin 39)
+  - GPIO20 (pin 38), GND (pin 39)
+  - GPIO21 (pin 40), GND (pin 39)
+
+![alt text](zerow.webp)
