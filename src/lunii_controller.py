@@ -74,29 +74,23 @@ class LuniiController:
         self.display.update(state)
 
         # then, handle the other controllers
+        if isinstance(state, MENU_STATE):
+            if state == MENU_STATE.LISTENING_PROMPT:
+                self.mic.start_listening()
 
-        # logging.info(f"Key pressed with code: {key_code}")
-        # if self.state.state == InputControllerState.LISTENING_PROMPT and (
-        #     key_code == INPUT_CONTROLLER_ACTION.PROMPT_INPUT_TOGGLE
-        # ):
-        #     self.state.next_state(InputControllerState.LISTENING_PROMPT_FINISHED)
-        #     self.mic.stop()
-        #     # self.ollama.stop_speech_to_text()
-        #     # text_to_seech(self.mic.prompt)
+            if state == MENU_STATE.LISTENING_PROMPT_FINISHED:
+                self.mic.stop()
+                logging.info(
+                    "Waiting for the validation / cancellation of the prompt..."
+                )
 
-        # elif (
-        #     self.state.state == InputControllerState.IDLE
-        #     and key_code == INPUT_CONTROLLER_ACTION.PROMPT_INPUT_TOGGLE
-        # ):
-        #     self.state.next_state(InputControllerState.LISTENING_PROMPT)
-        #     self.mic.start_listening()
-        #     # self.ollama.start_speech_to_text(None)
-        # elif (
-        #     self.mic.is_prompt_available
-        #     and key_code == INPUT_CONTROLLER_ACTION.CREATE_STORY_TOGGLE
-        # ):
-        #     self.state.next_state(InputControllerState.GENERATING_PROMPT)
-        #     self.new_story_from_mic()
+            if state == MENU_STATE.GENERATING_PROMPT:
+                self.new_story_from_mic()
+
+            if state == MENU_STATE.MODE_CHOICE:
+                self.mic.stop()
+                self.voice.stop()
+                self.ollama.stop()
 
     def on_story_tts_available(self, story_tts_filepath):
         logging.info("Story TTS available: {}".format(story_tts_filepath))

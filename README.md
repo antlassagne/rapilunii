@@ -5,9 +5,10 @@ TODO
 - [x] FreeCAD model --> A wood thingy will do
 - [x] Hardware description (BOM)
 - [x] Hardware soldering
+- [x] Reworked state machine
 - [ ] Displayed information design and implementation
-- [ ] STT backend - running on a remote machine
-- [ ] TTS backend - running on a remote machine
+- [x] STT backend - running on a remote machine
+- [x] TTS backend - running on a remote machine
 - [ ] Free conversation mode
 
 ## What is it
