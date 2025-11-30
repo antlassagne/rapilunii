@@ -125,11 +125,9 @@ class DisplayController:
 
     def display_text(self, text, line):
         logging.info("Display text blabla")
-        Font1 = ImageFont.truetype("../Font/Font01.ttf", 25)
-        _Font2 = ImageFont.truetype("../Font/Font01.ttf", 35)
-        _Font3 = ImageFont.truetype("../Font/Font02.ttf", 32)
+        font = ImageFont.truetype("./resources/Font02.ttf", 20)
 
-        self.draw.text((5, 5 + line * 20), text=text, fill="BLACK", font=Font1)
+        self.draw.text((5, 5 + line * 20), text=text, fill="BLACK", font=font)
 
         # self.draw.text((5, 68), "Hello world", fill="BLACK", font=Font1)
         # self.draw.text((5, 118), "WaveShare", fill="WHITE", font=Font2)
