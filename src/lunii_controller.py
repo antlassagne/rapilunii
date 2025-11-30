@@ -4,6 +4,7 @@ import requests  # type: ignore
 
 from src.display_controller import DisplayController
 from src.input_controller import INPUT_CONTROLLER_ACTION, InputController
+from src.logging_handler import CallbackHandler
 from src.mic_controller import MicController
 from src.ollama_controller import OllamaController
 from src.states import (
@@ -23,6 +24,13 @@ logging.basicConfig(
 
 class LuniiController:
     def __init__(self):
+        self.display = DisplayController()
+
+        # send every log to the display
+        hook_handler = CallbackHandler(callback=self.display.push_log_to_display_queue)
+        logger = logging.getLogger()
+        logger.addHandler(hook_handler)
+
         host = "http://localhost"
         self.local = True
         allow_remote = False
@@ -44,7 +52,6 @@ class LuniiController:
         self.ollama = OllamaController(host=host)
         self.voice = VoiceController(host=host)
         self.mic = MicController()
-        self.display = DisplayController()
         self.input = InputController()
         self.state = InputControllerStateMachine()
         logging.info("Hello, main controller!")
@@ -63,6 +70,15 @@ class LuniiController:
 
         # connect voice signals to warn us whenever tts .wav file is ready
         self.voice.tts_ready.connect(self.on_story_tts_available)
+
+    def stop_logger(self):
+        logger = logging.getLogger()
+        for h in logger.handlers[:]:
+            # Check if this handler is an instance of your custom class
+            if isinstance(h, CallbackHandler):
+                logger.removeHandler(h)
+                h.close()  # Always close custom handlers
+                logging.info("Custom handler removed.")
 
     def handle_input(self, key_code: int):
         self.state.next_state(INPUT_CONTROLLER_ACTION(key_code))

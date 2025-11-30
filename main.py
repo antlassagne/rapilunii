@@ -16,6 +16,7 @@ lunii = LuniiController()
 def signal_handler(signum, frame):
     global lunii
     print("\nSignal received, closing application...")
+    lunii.stop_logger()
     lunii.input.stop()
     # lunii.mic.stop()
 
