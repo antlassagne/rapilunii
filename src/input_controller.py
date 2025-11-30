@@ -5,7 +5,8 @@ from enum import Enum
 
 from gpiozero import Button
 from pynput.keyboard import Controller, KeyCode, Listener
-from PySide6.QtCore import QObject, Signal
+from PyQt6.QtCore import QObject
+from PyQt6.QtCore import pyqtSignal as Signal
 
 """
 Class that detects keyboard key presses and emits signals accordingly.

@@ -2,7 +2,7 @@ import logging
 import sys
 from enum import Enum
 
-from PySide6.QtCore import QObject
+from PyQt6.QtCore import QObject
 
 from src.input_controller import INPUT_CONTROLLER_ACTION
 

@@ -4,8 +4,8 @@ import os
 import signal
 import sys
 
-from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QApplication
+from PyQt6.QtCore import QTimer
+from PyQt6.QtWidgets import QApplication
 
 from src.lunii_controller import LuniiController
 
@@ -24,7 +24,7 @@ def signal_handler(signum, frame):
 
 
 if __name__ == "__main__":
-    app = QApplication()
+    app = QApplication(sys.argv)
 
     # Handle Ctrl+C gracefully
     signal.signal(signal.SIGINT, signal_handler)

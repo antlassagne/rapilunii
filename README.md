@@ -30,14 +30,24 @@ It's a small box that can tell stories. It's based on raspi zero with some addon
   - Ollama to generate a story from the transcription,
   - AllTalk to generate an voice back.
 
-## Step 0: Ollama setting
+## Installation
+
+### On the edge
+
+```
+sudo apt install libportaudio2
+```
+
+### On the big bad remote machine
+
+- Step 1: Ollama setting
 
 ```
 sudo snap install ollama
 sudo apt-get install portaudio19-dev ffmpeg
 ```
 
-## Step 1: STT setting
+- Step 2: STT setting
 
 ```
 git clone https://github.com/joshuaboniface/remote-faster-whisper
@@ -45,7 +55,7 @@ cd remote-faster-whisper
 sudo ./setup.sh
 ```
 
-## TTS setting
+- Step 3 TTS setting
 
 ### Coqui (testing impl, not the right one)
 
@@ -66,14 +76,6 @@ git clone -b alltalkbeta https://github.com/erew123/alltalk_tts
 cd alltalk_tts
 ./atsetup.sh
 ./start_alltalk.sh
-```
-
-Then, use xTTS-v2, female voice 1 or 6
-
-## STT setting
-
-```
-TODO, right now it's just a local whisper.
 ```
 
 ### Stack

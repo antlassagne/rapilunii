@@ -7,7 +7,8 @@ from queue import Queue
 import requests  # type: ignore
 from faster_whisper import WhisperModel
 from nava import play
-from PySide6.QtCore import QObject, Signal
+from PyQt6.QtCore import QObject
+from PyQt6.QtCore import pyqtSignal as Signal
 
 from src.alltalk_controller import AllTalkController
 

@@ -2,7 +2,8 @@ import logging
 import threading
 
 from ollama import Client
-from PySide6.QtCore import QObject, Signal
+from PyQt6.QtCore import QObject
+from PyQt6.QtCore import pyqtSignal as Signal
 
 from src.types import ErrorCode
 
@@ -11,7 +12,7 @@ MINIMUM_SENTENCE_LENGTH = 20
 
 
 class OllamaController(QObject):
-    # Signal emitted when a new story chunk is ready in async mode
+    # pyqtSignal as Signal emitted when a new story chunk is ready in async mode
     story_chunk_ready = Signal(str)
 
     # contains the story chunk that is ready to be published, or None
