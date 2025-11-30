@@ -4,9 +4,18 @@ import time
 from enum import Enum
 
 from gpiozero import Button
-from pynput.keyboard import Controller, KeyCode, Listener
 from PyQt6.QtCore import QObject
 from PyQt6.QtCore import pyqtSignal as Signal
+
+DEBUG_KEYBOARD_ENABLED = 0
+
+try:
+    from pynput.keyboard import Controller, KeyCode, Listener
+
+    DEBUG_KEYBOARD_ENABLED = 1
+except Exception as e:
+    logging.info("Unable to use the debugging keyboard here: {}".format(e))
+
 
 """
 Class that detects keyboard key presses and emits signals accordingly.
@@ -19,22 +28,16 @@ MIDDLE_BUTTON_ID = 2
 
 class KeyboardInputController(QObject):
     key_pressed = Signal(int)
-    keyboard = Controller()
+    keyboard_running = False
+
+    if DEBUG_KEYBOARD_ENABLED:
+        keyboard = Controller()
 
     def __init__(self):
         super().__init__()
         logging.info("Hello KeyboardInputController!")
 
-        is_running_on_respberry_pi = False
-
-        self.running = True
-        self.listener_thread = threading.Thread(target=self.run, daemon=True)
-        self.listener_thread.start()
-
-        self.listener = Listener(on_press=self.on_press)
-        self.listener.start()
-
-        if is_running_on_respberry_pi:
+        try:
             left_button = Button(LEFT_BUTTON_ID)
             right_button = Button(RIGHT_BUTTON_ID)
             middle_button = Button(MIDDLE_BUTTON_ID)
@@ -45,6 +48,17 @@ class KeyboardInputController(QObject):
             left_button.when_held = self.on__left_button_held
             right_button.when_held = self.on_right_button_held
             middle_button.when_held = self.on_middle_button_held
+        except Exception:
+            logging.info(
+                "Failed to initialize button, probably running on a dev machine without them."
+            )
+            logging.info("Falling back to keyboard.")
+            self.keyboard_running = True
+            self.listener_thread = threading.Thread(target=self.run, daemon=True)
+            self.listener_thread.start()
+
+            self.listener = Listener(on_press=self.on_press)
+            self.listener.start()
 
     ## double click implementation
     # from datetime import datetime, timedelta
@@ -99,12 +113,13 @@ class KeyboardInputController(QObject):
 
     def stop(self):
         logging.info("Stopping KeyboardInputController...")
-        self.running = False
-        self.listener_thread.join()
-        self.listener.stop()
+        if self.keyboard_running:
+            self.keyboard_running = False
+            self.listener_thread.join()
+            self.listener.stop()
 
     def run(self):
-        while self.running:
+        while self.keyboard_running:
             time.sleep(0.1)
 
     def on_press(self, key):
@@ -147,15 +162,17 @@ class InputController(QObject):
 
     def __init__(self):
         super().__init__()
-        self.keyboard = KeyboardInputController()
-        # Connect the signal before starting the keyboard
-        if not self.keyboard.key_pressed.connect(self.handle_key_press):
-            logging.info("Failed to connect keyboard signal.")
-        self.keyboard.key_pressed.emit(9)
+        if DEBUG_KEYBOARD_ENABLED:
+            self.keyboard = KeyboardInputController()
+            # Connect the signal before starting the keyboard
+            if not self.keyboard.key_pressed.connect(self.handle_key_press):
+                logging.info("Failed to connect keyboard signal.")
+            self.keyboard.key_pressed.emit(9)
         logging.info("Hello InputController!")
 
     def stop(self):
-        self.keyboard.stop()
+        if DEBUG_KEYBOARD_ENABLED:
+            self.keyboard.stop()
 
     def emit_signal(self):
         self.mic_input_finished.emit(self.out)
