@@ -35,7 +35,7 @@ It's a small box that can tell stories. It's based on raspi zero with some addon
 ### On the edge
 
 ```
-sudo apt install libportaudio2
+sudo apt install libportaudio2 portaudio19-dev
 ```
 
 ### On the big bad remote machine
