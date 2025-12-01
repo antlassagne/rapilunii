@@ -31,7 +31,13 @@ class DisplayController:
         self.log_queue: deque = deque(maxlen=MAX_AMOUNT_OF_LINES)
 
         try:
+            from src.external.apa102 import APA102
             from src.external.LCD_2inch import LCD_2inch
+
+            # disable the ReSpeaker LED because it collideds with the display
+            led_strip = APA102(num_led=3)
+            led_strip.clear_strip()
+            led_strip.cleanup()
 
             # display with hardware SPI:
             """

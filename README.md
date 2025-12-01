@@ -10,6 +10,7 @@ TODO
 - [x] STT backend - running on a remote machine
 - [x] TTS backend - running on a remote machine
 - [ ] Free conversation mode
+- [ ] Solve hat led / display SPI conflict
 
 ## What is it
 
@@ -35,7 +36,7 @@ It's a small box that can tell stories. It's based on raspi zero with some addon
 ### On the edge
 
 ```
-sudo apt install libportaudio2 portaudio19-dev
+sudo apt install libportaudio2 portaudio19-dev git-lfs
 ```
 
 ### On the big bad remote machine
