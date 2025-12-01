@@ -99,6 +99,7 @@ class DisplayController:
     def __del__(self):
         if self.disp is not None:
             self.disp.module_exit()
+            self.disp = None
 
         logging.info("DisplayController destructor called.")
 
