@@ -29,7 +29,7 @@ class DisplayController:
         }
 
         self.log_queue: deque = deque(maxlen=MAX_AMOUNT_OF_LINES)
-        self.font = ImageFont.truetype("./resources/Font02.ttf", 20)
+        self.font = ImageFont.truetype("./resources/Roboto-Regular.ttf", 20)
 
         try:
             from src.external.apa102 import APA102
