@@ -17,10 +17,6 @@ from src.states import (
 from src.types import ErrorCode
 from src.voice_controller import VoiceController
 
-logging.basicConfig(
-    level=logging.INFO, format="%(levelname)-5s - %(filename)-20s - %(message)s"
-)
-
 
 class LuniiController:
     def __init__(self):

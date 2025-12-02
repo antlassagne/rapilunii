@@ -29,6 +29,7 @@ class DisplayController:
         }
 
         self.log_queue: deque = deque(maxlen=MAX_AMOUNT_OF_LINES)
+        self.font = ImageFont.truetype("./resources/Font02.ttf", 20)
 
         try:
             from src.external.apa102 import APA102
@@ -124,6 +125,8 @@ class DisplayController:
             for i in range(0, len(self.log_queue)):
                 self.display_text(self.log_queue[i], i)
 
+            self.disp.ShowImage(image1)
+
     def update(
         self, state: WORKING_LANGUAGE | WORKING_MODE | DISPLAY_MODE | MENU_STATE
     ):
@@ -132,9 +135,8 @@ class DisplayController:
 
     def display_text(self, text, line):
         logging.info("Display text blabla")
-        font = ImageFont.truetype("./resources/Font02.ttf", 20)
 
-        self.draw.text((5, 5 + line * 20), text=text, fill="BLACK", font=font)
+        self.draw.text((5, 5 + line * 20), text=text, fill="BLACK", font=self.font)
 
         # self.draw.text((5, 68), "Hello world", fill="BLACK", font=Font1)
         # self.draw.text((5, 118), "WaveShare", fill="WHITE", font=Font2)
