@@ -1,5 +1,4 @@
 import logging
-import time
 from collections import deque
 
 from PIL import Image, ImageDraw, ImageFont
@@ -52,11 +51,11 @@ class DisplayController:
             # Set the backlight to 100
             self.disp.bl_DutyCycle(50)
 
-            logging.info("show image")
-            image = Image.open("../pic/LCD_2inch.jpg")
-            image = image.rotate(180)
-            self.disp.ShowImage(image)
-            time.sleep(1)
+            # logging.info("show image")
+            # image = Image.open("../pic/LCD_2inch.jpg")
+            # image = image.rotate(180)
+            # self.disp.ShowImage(image)
+            # time.sleep(1)
 
             # Create blank image for drawing.
             image1 = Image.new("RGB", (self.disp.height, self.disp.width), "WHITE")
@@ -134,8 +133,6 @@ class DisplayController:
             self.display_image(self.states_map[state])
 
     def display_text(self, text, line):
-        logging.info("Display text blabla")
-
         self.draw.text((5, 5 + line * 20), text=text, fill="BLACK", font=self.font)
 
         # self.draw.text((5, 68), "Hello world", fill="BLACK", font=Font1)
