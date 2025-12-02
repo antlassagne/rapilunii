@@ -21,11 +21,11 @@ class DisplayController:
         self.states_map = {
             WORKING_LANGUAGE.ENGLISH: "english",
             WORKING_LANGUAGE.FRENCH: "french",
-            WORKING_MODE.CONVERSATION_MODE: "conversation",
-            WORKING_MODE.STORY_MODE: "story",
-            MENU_STATE.LISTENING_PROMPT: "listening",
-            MENU_STATE.LISTENING_PROMPT_FINISHED: "listening done",
-            MENU_STATE.GENERATING_PROMPT: "generating",
+            WORKING_MODE.CONVERSATION_MODE: "./resources/conversation.jpg",
+            WORKING_MODE.STORY_MODE: "./resources/story.jpg",
+            MENU_STATE.LISTENING_PROMPT: "./resources/listening.jpg",
+            MENU_STATE.LISTENING_PROMPT_FINISHED: "./resources/validate.jpg",
+            MENU_STATE.GENERATING_PROMPT: "./resources/listenup.jpg",
         }
 
         self.log_queue: deque = deque(maxlen=MAX_AMOUNT_OF_LINES)
@@ -103,7 +103,7 @@ class DisplayController:
         except FileNotFoundError as e:
             logging.info("DisplayController error: {}".format(e))
 
-    def __del__(self):
+    def stop(self):
         if self.disp is not None:
             self.disp.module_exit()
             self.disp = None
