@@ -30,6 +30,7 @@ class LuniiController:
         host = "http://localhost"
         self.local = True
         allow_remote = False
+        self.async_mode = True
         # ping the default client and see if I need to fallback (dev only)
         if allow_remote:
             try:
@@ -59,7 +60,7 @@ class LuniiController:
         # self.voice.text_to_speech(test, "test.wav")
 
         # text = "je voudrais une histoire sur les étoiles avec des chiens et des chats, en 5 phrases."
-        # story = self.ollama.generate_story(text, True)
+        # story = self.ollama.generate_text_response(text, True)
 
         # Input signal (now onl from the keyboard during development)
         self.input.input_emitted.connect(self.handle_input)
@@ -131,7 +132,9 @@ class LuniiController:
             logging.info("Empty STT result.")
             return
 
-        story, error = self.ollama.generate_story(input_text)
+        story, error = self.ollama.generate_text_response(
+            input_text, self.state_machine.working_mode, self.async_mode
+        )
         if error != ErrorCode.SUCCESS:
             logging.info("Failed to generate the image.")
             return
