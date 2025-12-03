@@ -12,8 +12,10 @@ MINIMUM_SENTENCE_LENGTH = 20
 
 
 class OllamaController(QObject):
-    # pyqtSignal as Signal emitted when a new story chunk is ready in async mode
+    # Signal emitted when a new story chunk is ready in async mode
+    # manually triggered un sync mode
     story_chunk_ready = Signal(str)
+    generation_finished = Signal()
 
     # contains the story chunk that is ready to be published, or None
     story_to_publish = None
@@ -104,6 +106,9 @@ class OllamaController(QObject):
             untouched_story += story_chunk
             if async_mode:
                 self.refine_and_publish_story_if_ready()
+        if async_mode:
+            # don't emit this in non async mode, or it may be treated before the chunk is actually worked on
+            self.generation_finished.emit()
 
         logging.info("Story generation complete: {}".format(untouched_story))
         self.running = False

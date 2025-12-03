@@ -15,7 +15,7 @@ class MicController:
         for i in range(len(devices)):
             logging.info("index: %d, device name: %s" % (i, devices[i]))
         logging.info("Hello MicController!")
-        self.temp_file = ""
+        self.temp_file = "temp_audio.wav"
         self.running = False
         self.is_prompt_available = False
 

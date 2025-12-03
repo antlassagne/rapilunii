@@ -25,6 +25,7 @@ class STT_IMPL(Enum):
 
 class VoiceController(QObject):
     tts_ready = Signal(str)
+    job_done = Signal
 
     tts_mode = TTS_IMPL.ALLTALK  # alltalk
     stt_mode = STT_IMPL.REMOTE_FASTER_WHISPER
@@ -37,9 +38,12 @@ class VoiceController(QObject):
     def __init__(self, host: str):
         super().__init__()
 
-        model_size = "large-v3"
-        model_size = "turbo"
+        self.received_final_chunk = False
+        self.received_final_chunk_to_play = False
+
         if self.stt_mode == STT_IMPL.FAST_WHISPER:
+            model_size = "large-v3"
+            model_size = "turbo"
             # Run on GPU with FP16
             self.model = WhisperModel(model_size, device="cpu", compute_type="float32")
             # or run on GPU with INT8
@@ -64,6 +68,10 @@ class VoiceController(QObject):
     def __del__(self):
         self.stop()
 
+    def reset(self):
+        self.received_final_chunk = False
+        self.received_final_chunk_to_play = False
+
     def stop(self):
         logging.info("Stopping VoiceController...")
         self.running = False
@@ -71,14 +79,18 @@ class VoiceController(QObject):
         self.playback_thread.join()
         logging.info(" done.")
 
+    def signal_received_final_text_chunk(self):
+        self.received_final_chunk = True
+
     def push_to_tts_queue(self, text: str):
         logging.info("> TTS queuing text: {}".format(text))
         self.tts_queue.put(text)
         logging.info("> TTS queue size: {}".format(self.tts_queue.qsize()))
 
-    def push_to_playback_queue(self, audio_file_path: str):
+    def push_to_playback_queue(self, audio_file_path: str, final: bool):
         logging.info("> Playback queuing audio file: {}".format(audio_file_path))
         self.playback_queue.put(audio_file_path)
+        self.received_final_chunk_to_play = True
         logging.info("> Playback queue size: {}".format(self.playback_queue.qsize()))
 
     def tts_worker(self):
@@ -86,6 +98,8 @@ class VoiceController(QObject):
         while self.running:
             if self.tts_queue.empty():
                 time.sleep(1)
+                if self.received_final_chunk:
+                    self.received_final_chunk_to_play = True
                 continue
 
             text = self.tts_queue.get()
@@ -101,10 +115,18 @@ class VoiceController(QObject):
             if self.playback_queue.empty():
                 time.sleep(1)
                 continue
+
             audio_file_path = self.playback_queue.get()
             logging.info("> Playback worker got audio file: {}".format(audio_file_path))
             self.play_audio_file(audio_file_path)
             self.playback_queue.task_done()
+
+            # was this the very final thing to do for this whole stt => generation => tts?
+            if self.playback_queue.empty():
+                if self.received_final_chunk_to_play:
+                    # this was the final thing to do.
+                    self.job_done.emit()
+                    self.reset()
 
     def text_to_speech(self, text: str, output_file: str):
         logging.info("> TTS starting TTS request")

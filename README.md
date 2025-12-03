@@ -6,7 +6,7 @@ TODO
 - [x] Hardware description (BOM)
 - [x] Hardware soldering
 - [x] Reworked state machine
-- [ ] Displayed information design and implementation
+- [x] Displayed information design and implementation
 - [x] STT backend - running on a remote machine
 - [x] TTS backend - running on a remote machine
 - [ ] Free conversation mode
@@ -51,9 +51,7 @@ sudo apt-get install portaudio19-dev ffmpeg
 - Step 2: STT setting
 
 ```
-git clone https://github.com/joshuaboniface/remote-faster-whisper
-cd remote-faster-whisper
-sudo ./setup.sh
+docker run --gpus all -e LANGUAGE=fr -e MODEL=large-v3 -e DEVICE=cpu -e TRANSLATE=no -e COMPUTE_SIZE=float32 -p 9876:9876 remotefasterwhisper:latest
 ```
 
 - Step 3 TTS setting
