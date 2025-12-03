@@ -1,4 +1,5 @@
 import logging
+import sys
 
 import requests  # type: ignore
 
@@ -19,7 +20,7 @@ from src.voice_controller import VoiceController
 
 
 class LuniiController:
-    def __init__(self):
+    def __init__(self, args):
         self.display = DisplayController()
 
         # send every log to the display
@@ -27,24 +28,29 @@ class LuniiController:
         logger = logging.getLogger()
         logger.addHandler(hook_handler)
 
-        host = "http://localhost"
-        self.local = True
-        allow_remote = False
-        self.async_mode = True
+        host = args.remote_worker_ip
+        allow_local_fallback = args.allow_local_fallback
+        self.async_mode = not args.sync_mode
+        logging.info("Remote worker IP: {}".format(host))
+        logging.info("Async mode: {}".format(self.async_mode))
+
         # ping the default client and see if I need to fallback (dev only)
-        if allow_remote:
-            try:
-                r = requests.get(host)
-                if r.status_code == 200:
-                    host = "http://192.168.50.227"
-                    self.local = False
-                else:
-                    logging.info("Running the remote backend.")
-            except Exception as _:
+        try:
+            r = requests.get(host)
+            if r.status_code == 200:
+                logging.info("Running the remote backend.")
+            else:
+                if allow_local_fallback:
+                    host = "http://localhost"
+        except Exception as _:
+            logging.info("Server not reachable")
+            if allow_local_fallback:
+                host = "http://localhost"
                 logging.info(
                     "Cannot reach the remote backend, running the backend locally."
                 )
-                logging.info("Server not reachable")
+            else:
+                sys.exit(1)
 
         self.ollama = OllamaController(host=host)
         self.voice = VoiceController(host=host)
@@ -104,7 +110,7 @@ class LuniiController:
                 )
 
             if state == MENU_STATE.GENERATING_PROMPT:
-                self.new_story_from_mic()
+                self.new_story_from_mic(self.async_mode)
 
             if state == MENU_STATE.MODE_CHOICE:
                 self.mic.stop()
@@ -133,7 +139,7 @@ class LuniiController:
             return
 
         story, error = self.ollama.generate_text_response(
-            input_text, self.state_machine.working_mode, self.async_mode
+            input_text, self.state_machine.working_mode, async_mode
         )
         if error != ErrorCode.SUCCESS:
             logging.info("Failed to generate the image.")

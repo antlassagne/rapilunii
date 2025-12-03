@@ -1,5 +1,5 @@
 #!/bin/env python3
-
+import argparse
 import logging
 import os
 import signal
@@ -26,22 +26,37 @@ logging.basicConfig(
     level=logging.INFO, format="%(levelname)-5s - %(filename)-20s - %(message)s"
 )
 
-lunii = LuniiController()
-
-
-def signal_handler(signum, frame):
-    global lunii
-    print("\nSignal received, closing application...")
-    lunii.stop_logger()
-    lunii.input.stop()
-    lunii.display.stop()
-    # lunii.mic.stop()
-
-    QApplication.quit()
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--remote_worker_ip",
+        help="IP of the machine that will run the STT, LLM and TTS.",
+    )
+    parser.add_argument(
+        "--allow_local_fallback",
+        action="store_true",
+        help="[dev only] faallback locally whenever remote is not reachable",
+    )
+    parser.add_argument(
+        "--sync_mode",
+        action="store_true",
+        help="Wait the whole text generation before running the TTS and playback",
+    )
+    args = parser.parse_args()
+
+    lunii = LuniiController(args)
+
+    def signal_handler(signum, frame):
+        print("\nSignal received, closing application...")
+        lunii.stop_logger()
+        lunii.input.stop()
+        lunii.display.stop()
+        # lunii.mic.stop()
+
+        QApplication.quit()
 
     # Handle Ctrl+C gracefully
     signal.signal(signal.SIGINT, signal_handler)
