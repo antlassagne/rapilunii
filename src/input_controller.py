@@ -21,9 +21,9 @@ except Exception as e:
 Class that detects keyboard key presses and emits signals accordingly.
 """
 
-LEFT_BUTTON_ID = 0
-RIGHT_BUTTON_ID = 1
-MIDDLE_BUTTON_ID = 2
+LEFT_BUTTON_ID = 16
+RIGHT_BUTTON_ID = 20
+MIDDLE_BUTTON_ID = 21
 
 
 class KeyboardInputController(QObject):
