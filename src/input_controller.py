@@ -22,7 +22,7 @@ Class that detects keyboard key presses and emits signals accordingly.
 """
 
 LEFT_BUTTON_ID = 16
-RIGHT_BUTTON_ID = 20
+RIGHT_BUTTON_ID = 17
 MIDDLE_BUTTON_ID = 21
 
 
@@ -38,19 +38,12 @@ class KeyboardInputController(QObject):
         logging.info("Hello KeyboardInputController!")
 
         try:
-            # self.raspi_input_running = True
-            # self.raspi_input_thread = threading.Thread(target=self.run_raspi_input, daemon=True)
-            # self.raspi_input_thread.start()
-            self.left_button = Button(LEFT_BUTTON_ID)
-            self.right_button = Button(RIGHT_BUTTON_ID)
-            self.middle_button = Button(MIDDLE_BUTTON_ID)
+            self.raspi_input_running = True
+            self.raspi_input_thread = threading.Thread(
+                target=self.run_raspi_input, daemon=True
+            )
+            self.raspi_input_thread.start()
 
-            self.left_button.when_released = self.on__left_button_released
-            self.right_button.when_released = self.on_right_button_released
-            self.middle_button.when_released = self.on_middle_button_released
-            self.left_button.when_held = self.on__left_button_held
-            self.right_button.when_held = self.on_right_button_held
-            self.middle_button.when_held = self.on_middle_button_held
         except Exception:
             logging.info(
                 "Failed to initialize button, probably running on a dev machine without them."
@@ -82,7 +75,7 @@ class KeyboardInputController(QObject):
     # btn = Button(3)
     # btn.when_pressed = pressed
 
-    def on__left_button_released(self):
+    def on_left_button_released(self):
         logging.info("Left button released.")
         self.key_pressed.emit(INPUT_CONTROLLER_ACTION.LEFT_BUTTON_TOGGLE.value)
 
@@ -121,8 +114,34 @@ class KeyboardInputController(QObject):
             self.listener_thread.join()
             self.listener.stop()
 
+        if self.raspi_input_running:
+            self.raspi_input_running = False
+            self.raspi_input_thread.join()
+
     def run(self):
         while self.keyboard_running:
+            time.sleep(0.1)
+
+    def run_raspi_input(self):
+        logging.info("Starting the raspi input thread.")
+        self.left_button = Button(LEFT_BUTTON_ID)
+        self.right_button = Button(RIGHT_BUTTON_ID)
+        self.middle_button = Button(MIDDLE_BUTTON_ID)
+
+        self.left_button.when_released = self.on_left_button_released
+        self.right_button.when_released = self.on_right_button_released
+        self.middle_button.when_released = self.on_middle_button_released
+        self.left_button.when_held = self.on__left_button_held
+        self.right_button.when_held = self.on_right_button_held
+        self.middle_button.when_held = self.on_middle_button_held
+
+        logging.info("Looping..")
+        while self.raspi_input_running:
+            if self.left_button.is_pressed:
+                self.on_left_button_released()
+            if self.right_button.is_pressed:
+                self.on_right_button_released()
+            print(".", end="", flush=True)
             time.sleep(0.1)
 
     def on_press(self, key):
@@ -176,9 +195,6 @@ class InputController(QObject):
     def stop(self):
         if DEBUG_KEYBOARD_ENABLED:
             self.keyboard.stop()
-
-    def emit_signal(self):
-        self.mic_input_finished.emit(self.out)
 
     def handle_key_press(self, key_code):
         self.input_emitted.emit(key_code)
