@@ -38,16 +38,19 @@ class KeyboardInputController(QObject):
         logging.info("Hello KeyboardInputController!")
 
         try:
-            left_button = Button(LEFT_BUTTON_ID)
-            right_button = Button(RIGHT_BUTTON_ID)
-            middle_button = Button(MIDDLE_BUTTON_ID)
+            # self.raspi_input_running = True
+            # self.raspi_input_thread = threading.Thread(target=self.run_raspi_input, daemon=True)
+            # self.raspi_input_thread.start()
+            self.left_button = Button(LEFT_BUTTON_ID)
+            self.right_button = Button(RIGHT_BUTTON_ID)
+            self.middle_button = Button(MIDDLE_BUTTON_ID)
 
-            left_button.when_released = self.on__left_button_released
-            right_button.when_released = self.on_right_button_released
-            middle_button.when_released = self.on_middle_button_released
-            left_button.when_held = self.on__left_button_held
-            right_button.when_held = self.on_right_button_held
-            middle_button.when_held = self.on_middle_button_held
+            self.left_button.when_released = self.on__left_button_released
+            self.right_button.when_released = self.on_right_button_released
+            self.middle_button.when_released = self.on_middle_button_released
+            self.left_button.when_held = self.on__left_button_held
+            self.right_button.when_held = self.on_right_button_held
+            self.middle_button.when_held = self.on_middle_button_held
         except Exception:
             logging.info(
                 "Failed to initialize button, probably running on a dev machine without them."

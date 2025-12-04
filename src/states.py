@@ -48,12 +48,13 @@ class InputControllerStateMachine(QObject):
                 # switch working mode
                 self.working_mode = WORKING_MODE(not bool(int(self.working_mode.value)))
                 return self.working_mode
-            elif self.menu_state == MENU_STATE.LANGUAGE_CHOICE:
-                # switch language
-                self.working_language = WORKING_LANGUAGE(
-                    not bool(int(self.working_language.value))
-                )
-                return self.working_language
+            # multilanguage is bothersome to setup ATM because my STT server cannot dynamically change languages
+            # elif self.menu_state == MENU_STATE.LANGUAGE_CHOICE:
+            #     # switch language
+            #     self.working_language = WORKING_LANGUAGE(
+            #         not bool(int(self.working_language.value))
+            #     )
+            #     return self.working_language
 
             # this button allows to restart the prompt listening
             elif self.menu_state == MENU_STATE.LISTENING_PROMPT_FINISHED:
@@ -74,7 +75,10 @@ class InputControllerStateMachine(QObject):
                 if self.working_mode == WORKING_MODE.CONVERSATION_MODE:
                     self.menu_state = MENU_STATE.LISTENING_PROMPT
                 else:
-                    self.menu_state = MENU_STATE.LANGUAGE_CHOICE
+                    # not implemented RN
+                    # self.menu_state = MENU_STATE.LANGUAGE_CHOICE
+                    # fallback
+                    self.menu_state = MENU_STATE.LISTENING_PROMPT
 
             elif self.menu_state == MENU_STATE.LANGUAGE_CHOICE:
                 self.menu_state = MENU_STATE.LISTENING_PROMPT
