@@ -22,12 +22,13 @@ Class that detects keyboard key presses and emits signals accordingly.
 """
 
 LEFT_BUTTON_ID = 16
-RIGHT_BUTTON_ID = 17
-MIDDLE_BUTTON_ID = 21
+MIDDLE_BUTTON_ID = 17
+RIGHT_BUTTON_ID = 21
 
 
-class KeyboardInputController(QObject):
+class InputController(QObject):
     key_pressed = Signal(int)
+
     keyboard_running = False
 
     if DEBUG_KEYBOARD_ENABLED:
@@ -35,15 +36,22 @@ class KeyboardInputController(QObject):
 
     def __init__(self):
         super().__init__()
-        logging.info("Hello KeyboardInputController!")
+        logging.info("Hello InputController!")
 
         try:
-            self.raspi_input_running = True
-            self.raspi_input_thread = threading.Thread(
-                target=self.run_raspi_input, daemon=True
-            )
-            self.raspi_input_thread.start()
+            # self.raspi_input_running = True
+            # self.raspi_input_thread = threading.Thread(target=self.run_raspi_input, daemon=True)
+            # self.raspi_input_thread.start()
+            self.left_button = Button(LEFT_BUTTON_ID)
+            self.right_button = Button(RIGHT_BUTTON_ID)
+            self.middle_button = Button(MIDDLE_BUTTON_ID)
 
+            self.left_button.when_released = self.on_left_button_released
+            self.right_button.when_released = self.on_right_button_released
+            self.middle_button.when_released = self.on_middle_button_released
+            self.left_button.when_held = self.on_left_button_held
+            self.right_button.when_held = self.on_right_button_held
+            self.middle_button.when_held = self.on_middle_button_held
         except Exception:
             logging.info(
                 "Failed to initialize button, probably running on a dev machine without them."
@@ -108,40 +116,14 @@ class KeyboardInputController(QObject):
         # reboot the device
 
     def stop(self):
-        logging.info("Stopping KeyboardInputController...")
+        logging.info("Stopping InputController...")
         if self.keyboard_running:
             self.keyboard_running = False
             self.listener_thread.join()
             self.listener.stop()
 
-        if self.raspi_input_running:
-            self.raspi_input_running = False
-            self.raspi_input_thread.join()
-
     def run(self):
         while self.keyboard_running:
-            time.sleep(0.1)
-
-    def run_raspi_input(self):
-        logging.info("Starting the raspi input thread.")
-        self.left_button = Button(LEFT_BUTTON_ID)
-        self.right_button = Button(RIGHT_BUTTON_ID)
-        self.middle_button = Button(MIDDLE_BUTTON_ID)
-
-        self.left_button.when_released = self.on_left_button_released
-        self.right_button.when_released = self.on_right_button_released
-        self.middle_button.when_released = self.on_middle_button_released
-        self.left_button.when_held = self.on__left_button_held
-        self.right_button.when_held = self.on_right_button_held
-        self.middle_button.when_held = self.on_middle_button_held
-
-        logging.info("Looping..")
-        while self.raspi_input_running:
-            if self.left_button.is_pressed:
-                self.on_left_button_released()
-            if self.right_button.is_pressed:
-                self.on_right_button_released()
-            print(".", end="", flush=True)
             time.sleep(0.1)
 
     def on_press(self, key):
@@ -176,25 +158,3 @@ class INPUT_CONTROLLER_ACTION(Enum):
     LEFT_BUTTON_HELD = 3
     MIDDLE_BUTTON_HELD = 4
     RIGHT_BUTTON_HELD = 5
-
-
-class InputController(QObject):
-    input_emitted = Signal(int)
-    out = 1
-
-    def __init__(self):
-        super().__init__()
-        if DEBUG_KEYBOARD_ENABLED:
-            self.keyboard = KeyboardInputController()
-            # Connect the signal before starting the keyboard
-            if not self.keyboard.key_pressed.connect(self.handle_key_press):
-                logging.info("Failed to connect keyboard signal.")
-            self.keyboard.key_pressed.emit(9)
-        logging.info("Hello InputController!")
-
-    def stop(self):
-        if DEBUG_KEYBOARD_ENABLED:
-            self.keyboard.stop()
-
-    def handle_key_press(self, key_code):
-        self.input_emitted.emit(key_code)

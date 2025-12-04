@@ -69,7 +69,7 @@ class LuniiController:
         # story = self.ollama.generate_text_response(text, True)
 
         # Input signal (now onl from the keyboard during development)
-        self.input.input_emitted.connect(self.handle_input)
+        self.input.key_pressed.connect(self.handle_input)
 
         # connect ollama signals to warn us whenever a written sntence is ready
         self.ollama.story_chunk_ready.connect(self.on_story_chunk_available)
