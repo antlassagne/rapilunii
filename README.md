@@ -9,7 +9,7 @@ TODO
 - [x] Displayed information design and implementation
 - [x] STT backend - running on a remote machine
 - [x] TTS backend - running on a remote machine
-- [ ] Free conversation mode
+- [x] Free conversation mode
 - [ ] Solve hat led / display SPI conflict
 
 ## What is it

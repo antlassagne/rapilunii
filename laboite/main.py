@@ -8,7 +8,7 @@ import sys
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QApplication
 
-from src.lunii_controller import LuniiController
+from laboite.src.lunii_controller import LuniiController
 
 os.environ["QT_QPA_PLATFORM"] = "minimal"
 
@@ -27,7 +27,7 @@ logging.basicConfig(
 )
 
 
-if __name__ == "__main__":
+def main():
     app = QApplication(sys.argv)
 
     parser = argparse.ArgumentParser()
@@ -66,3 +66,7 @@ if __name__ == "__main__":
     timer.timeout.connect(lambda: None)
     timer.start(100)
     sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()

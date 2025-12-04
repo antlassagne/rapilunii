@@ -5,8 +5,8 @@ from ollama import Client
 from PyQt6.QtCore import QObject
 from PyQt6.QtCore import pyqtSignal as Signal
 
-from src.states import WORKING_MODE
-from src.types import ErrorCode
+from laboite.src.states import WORKING_MODE
+from laboite.src.types import ErrorCode
 
 SENTENCES_SPLITTERS = [".", "!", "?"]
 MINIMUM_SENTENCE_LENGTH = 20
@@ -36,7 +36,7 @@ class OllamaController(QObject):
         # self.story_model = "wizardlm2:7b"
         # self.story_model = "deepseek-r1"
 
-        self.story_model = "MathiasB/llama3fr"
+        # self.story_model = "MathiasB/llama3fr"
         self.story_model = "jobautomation/OpenEuroLLM-French"
         self.story_preprompt = "Tu es un conteur d'histoires pour enfants de 3 ans. Crée une histoire captivante et imaginative. L'histoire doit durer 3 minutes. Évidemment tu tutoies l'enfant et tu parles un français correct, bien qu'adapté à cet âge. Pas d'introduction, tu commences l'histoire tout de suite, et n'ajoute rien non plus une fois l'histoire terminée. Donne un titre, mais ne commence pas par 'il était une fois.'. Base toi sur le prompt suivant: "
         self.conversation_preprompt = ""

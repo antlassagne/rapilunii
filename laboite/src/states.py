@@ -5,7 +5,7 @@ from enum import Enum
 
 from PyQt6.QtCore import QObject
 
-from src.input_controller import INPUT_CONTROLLER_ACTION
+from laboite.src.input_controller import INPUT_CONTROLLER_ACTION
 
 
 class MENU_STATE(Enum):
@@ -14,6 +14,7 @@ class MENU_STATE(Enum):
     LISTENING_PROMPT = 2
     LISTENING_PROMPT_FINISHED = 3
     GENERATING_PROMPT = 4
+    JOB_DONE = 5
 
 
 class WORKING_MODE(Enum):
@@ -40,6 +41,15 @@ class InputControllerStateMachine(QObject):
     def __init__(self):
         super().__init__()
         logging.info("InputControllerStateMachine initialized.")
+
+    def job_done(self):
+        logging.info("Job done.")
+        if self.working_mode == WORKING_MODE.CONVERSATION_MODE:
+            self.menu_state = MENU_STATE.MODE_CHOICE
+            return self.menu_state
+        elif self.working_mode == WORKING_MODE.STORY_MODE:
+            self.menu_state = MENU_STATE.MODE_CHOICE  # yes it's the same thing right now, it's simpler but it requires an additional button press.
+            return self.menu_state
 
     def next_state(self, input_event: INPUT_CONTROLLER_ACTION):
         if input_event == INPUT_CONTROLLER_ACTION.LEFT_BUTTON_TOGGLE:

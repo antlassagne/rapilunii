@@ -1,7 +1,7 @@
 [project]
-name = "raspilunii"
+name = "laboite"
 version = "0.1.0"
-description = "Add your description here"
+description = "laboite is a box that you can discuss with, or it will tell you stories."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -20,3 +20,10 @@ dependencies = [
     "spidev>=3.8",
     "types-requests>=2.32.4.20250913",
 ]
+
+[project.scripts]
+laboite = "laboite.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["laboite"]

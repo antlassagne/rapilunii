@@ -3,20 +3,20 @@ import sys
 
 import requests  # type: ignore
 
-from src.display_controller import DisplayController
-from src.input_controller import INPUT_CONTROLLER_ACTION, InputController
-from src.logging_handler import CallbackHandler
-from src.mic_controller import MicController
-from src.ollama_controller import OllamaController
-from src.states import (
+from laboite.src.display_controller import DisplayController
+from laboite.src.input_controller import INPUT_CONTROLLER_ACTION, InputController
+from laboite.src.logging_handler import CallbackHandler
+from laboite.src.mic_controller import MicController
+from laboite.src.ollama_controller import OllamaController
+from laboite.src.states import (
     DISPLAY_MODE,
     MENU_STATE,
     WORKING_LANGUAGE,
     WORKING_MODE,
     InputControllerStateMachine,
 )
-from src.types import ErrorCode
-from src.voice_controller import VoiceController
+from laboite.src.types import ErrorCode
+from laboite.src.voice_controller import VoiceController
 
 
 class LuniiController:
@@ -33,6 +33,9 @@ class LuniiController:
         self.async_mode = not args.sync_mode
         logging.info("Remote worker IP: {}".format(host))
         logging.info("Async mode: {}".format(self.async_mode))
+
+        if host is None:
+            host = "http://localhost"
 
         # ping the default client and see if I need to fallback (dev only)
         try:
@@ -74,6 +77,7 @@ class LuniiController:
         # connect ollama signals to warn us whenever a written sntence is ready
         self.ollama.story_chunk_ready.connect(self.on_story_chunk_available)
         self.ollama.generation_finished.connect(self.on_story_generation_finished)
+        self.voice.job_done.connect(self.on_job_done)
 
         # connect voice signals to warn us whenever tts .wav file is ready
         self.voice.tts_ready.connect(self.on_story_tts_available)
@@ -90,6 +94,10 @@ class LuniiController:
     def handle_input(self, key_code: int):
         state = self.state_machine.next_state(INPUT_CONTROLLER_ACTION(key_code))
         logging.info("State change: {}".format(state))
+        self.on_state_changed(state)
+
+    def on_job_done(self):
+        state = self.state_machine.job_done()
         self.on_state_changed(state)
 
     def on_state_changed(
@@ -114,7 +122,7 @@ class LuniiController:
 
             if state == MENU_STATE.MODE_CHOICE:
                 self.mic.stop()
-                self.voice.stop()
+                self.voice.reset()
                 self.ollama.stop()
 
     def on_story_tts_available(self, story_tts_filepath, final):

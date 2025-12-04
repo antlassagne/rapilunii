@@ -3,7 +3,7 @@ from collections import deque
 
 from PIL import Image, ImageDraw, ImageFont
 
-from src.states import DISPLAY_MODE, MENU_STATE, WORKING_LANGUAGE, WORKING_MODE
+from laboite.src.states import DISPLAY_MODE, MENU_STATE, WORKING_LANGUAGE, WORKING_MODE
 
 MAX_AMOUNT_OF_LINES = 10
 
@@ -20,18 +20,18 @@ class DisplayController:
         self.states_map = {
             WORKING_LANGUAGE.ENGLISH: "english",
             WORKING_LANGUAGE.FRENCH: "french",
-            WORKING_MODE.CONVERSATION_MODE: "./resources/conversation.jpg",
-            WORKING_MODE.STORY_MODE: "./resources/story.jpg",
-            MENU_STATE.LISTENING_PROMPT: "./resources/listening.jpg",
-            MENU_STATE.LISTENING_PROMPT_FINISHED: "./resources/validate.jpg",
-            MENU_STATE.GENERATING_PROMPT: "./resources/listenup.jpg",
+            WORKING_MODE.CONVERSATION_MODE: "./laboite/resources/conversation.jpg",
+            WORKING_MODE.STORY_MODE: "./laboite/resources/story.jpg",
+            MENU_STATE.LISTENING_PROMPT: "./laboite/resources/listening.jpg",
+            MENU_STATE.LISTENING_PROMPT_FINISHED: "./laboite/resources/validate.jpg",
+            MENU_STATE.GENERATING_PROMPT: "./laboite/resources/listenup.jpg",
         }
 
         self.log_queue: deque = deque(maxlen=MAX_AMOUNT_OF_LINES)
-        self.font = ImageFont.truetype("./resources/Roboto-Regular.ttf", 20)
+        self.font = ImageFont.truetype("./laboite/resources/Roboto-Regular.ttf", 20)
 
         try:
-            from src.external.LCD_2inch import LCD_2inch
+            from laboite.src.external.LCD_2inch import LCD_2inch
 
             # disable the ReSpeaker LED because it collideds with the display
             # led_strip = APA102(num_led=3)

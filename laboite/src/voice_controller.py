@@ -10,7 +10,7 @@ from nava import play
 from PyQt6.QtCore import QObject
 from PyQt6.QtCore import pyqtSignal as Signal
 
-from src.alltalk_controller import AllTalkController
+from laboite.src.alltalk_controller import AllTalkController
 
 
 class TTS_IMPL(Enum):

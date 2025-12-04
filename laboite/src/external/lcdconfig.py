@@ -104,7 +104,7 @@ class RaspberryPi:
 
     def module_exit(self):
         logging.debug("spi end")
-        if self.SPI != None:
+        if self.SPI is not None:
             self.SPI.close()
 
         logging.debug("gpio cleanup...")
