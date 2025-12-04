@@ -27,9 +27,9 @@ It's a small box that can tell stories. It's based on raspi zero with some addon
 
 - A controler running on the pi
 - 3 services running on an external, more powerful, machine
-  - Whisper to transcribe the voice input,
-  - Ollama to generate a story from the transcription,
-  - AllTalk to generate an voice back.
+  - Whisper to transcribe the voice input (port 9876),
+  - Ollama to generate a story from the transcription (port 11434),
+  - AllTalk to generate an voice back (port 7851).
 
 ## Installation
 
