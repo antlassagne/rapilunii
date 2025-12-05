@@ -1,5 +1,5 @@
 import logging
-import threading
+import multiprocessing
 import time
 from enum import Enum
 from queue import Queue
@@ -57,9 +57,9 @@ class VoiceController(QObject):
         self.alltalk_controller = AllTalkController()
 
         self.running = True
-        self.tts_thread = threading.Thread(target=self.tts_worker, daemon=True)
+        self.tts_thread = multiprocessing.Process(target=self.tts_worker, daemon=True)
         self.tts_thread.start()
-        self.playback_thread = threading.Thread(
+        self.playback_thread = multiprocessing.Process(
             target=self.playback_worker, daemon=True
         )
         self.playback_thread.start()

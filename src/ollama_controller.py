@@ -1,5 +1,5 @@
 import logging
-import threading
+import multiprocessing
 
 from ollama import Client
 from PyQt6.QtCore import QObject
@@ -84,7 +84,7 @@ class OllamaController(QObject):
             logging.info("Story generation already in progress.")
             return "", ErrorCode.BUSY
         if async_mode:
-            self.generation_thread = threading.Thread(
+            self.generation_thread = multiprocessing.Process(
                 target=self.generate_text_response_worker,
                 args=(prompt, working_mode, True),
                 daemon=True,

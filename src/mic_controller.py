@@ -1,6 +1,6 @@
 import logging
+import multiprocessing
 import struct
-import threading
 import wave
 
 from pvrecorder import PvRecorder
@@ -23,7 +23,7 @@ class MicController:
         logging.info("Started listening for prompt...")
         self.is_prompt_available = False
         self.running = True
-        self.listener_thread = threading.Thread(target=self.run, daemon=True)
+        self.listener_thread = multiprocessing.Process(target=self.run, daemon=True)
         self.listener_thread.start()
 
     def stop(self):
