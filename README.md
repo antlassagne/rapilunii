@@ -43,14 +43,15 @@ sudo apt install libportaudio2 portaudio19-dev git-lfs
 
 - Step 1: Ollama setting
 
-```
+```bash
 sudo snap install ollama
-sudo apt-get install portaudio19-dev ffmpeg
+sudo snap set ollama host=0.0.0.0:11434
+ollama pull obautomation/OpenEuroLLM-French # will be done automatically but doing it before to avoid surprises
 ```
 
 - Step 2: STT setting
 
-```
+```bash
 docker run --gpus all -e LANGUAGE=fr -e MODEL=large-v3 -e DEVICE=cpu -e TRANSLATE=no -e COMPUTE_SIZE=float32 -p 9876:9876 remotefasterwhisper:latest
 ```
 
@@ -77,8 +78,35 @@ cd alltalk_tts
 ./start_alltalk.sh
 ```
 
-### Stack
+## Rebuilding the Stack
 
+### Remote fast whisper
+
+Prepare the machine
+
+```bash
+docker run --privileged --rm tonistiigi/binfmt --install all
+sudo nano /etc/docker/daemon.json
 ```
 
+Add the `features` part
+
+```json
+{
+    "runtimes": {
+        "nvidia": {
+            "args": [],
+            "path": "nvidia-container-runtime"
+        }
+    },
+    "features": {
+        "containerd-snapshotter": true
+    }
+}
+```
+
+```bash
+git clone https://github.com/joshuaboniface/remote-faster-whisper.git
+cd remote-fast-whisper
+docker buildx build --push --tag braoutch/remotefastwhisper:latest --platform linux/amd64,linux/arm64 .
 ```

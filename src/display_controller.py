@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from src.states import DISPLAY_MODE, MENU_STATE, WORKING_LANGUAGE, WORKING_MODE
 
-MAX_AMOUNT_OF_LINES = 10
+MAX_AMOUNT_OF_LINES = 15
 
 
 class DisplayController:
@@ -20,11 +20,11 @@ class DisplayController:
         self.states_map = {
             WORKING_LANGUAGE.ENGLISH: "english",
             WORKING_LANGUAGE.FRENCH: "french",
-            WORKING_MODE.CONVERSATION_MODE: "./resources/conversation.jpg",
-            WORKING_MODE.STORY_MODE: "./resources/story.jpg",
-            MENU_STATE.LISTENING_PROMPT: "./resources/listening.jpg",
-            MENU_STATE.LISTENING_PROMPT_FINISHED: "./resources/validate.jpg",
-            MENU_STATE.GENERATING_PROMPT: "./resources/listenup.jpg",
+            WORKING_MODE.CONVERSATION_MODE: "./resources/lowres/conversation_320.jpg",
+            WORKING_MODE.STORY_MODE: "./resources/lowres/story_320.jpg",
+            MENU_STATE.LISTENING_PROMPT: "./resources/lowres/listening_320.jpg",
+            MENU_STATE.LISTENING_PROMPT_FINISHED: "./resources/lowres/validate_320.jpg",
+            MENU_STATE.GENERATING_PROMPT: "./resources/lowres/listenup_320.jpg",
         }
 
         self.log_queue: deque = deque(maxlen=MAX_AMOUNT_OF_LINES)
@@ -54,6 +54,8 @@ class DisplayController:
         except FileNotFoundError as e:
             logging.info("DisplayController error: {}".format(e))
 
+        self.update(WORKING_MODE.CONVERSATION_MODE)
+
     def stop(self):
         if self.disp is not None:
             self.disp.module_exit()
@@ -81,8 +83,15 @@ class DisplayController:
     def update(
         self, state: WORKING_LANGUAGE | WORKING_MODE | DISPLAY_MODE | MENU_STATE
     ):
-        if self.mode == DISPLAY_MODE.VISUAL and state in self.states_map:
-            self.display_image(self.states_map[state])
+        if self.mode == DISPLAY_MODE.VISUAL:
+            if state in self.states_map:
+                self.display_image(self.states_map[state])
+            else:
+                raise Exception(
+                    "This state is not supposed to call an image update: {}".format(
+                        state
+                    )
+                )
 
     def display_text(self, text, line):
         self.draw.text((5, 5 + line * 20), text=text, fill="BLACK", font=self.font)

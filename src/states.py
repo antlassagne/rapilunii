@@ -58,7 +58,12 @@ class InputControllerStateMachine(QObject):
 
             # this button allows to restart the prompt listening
             elif self.menu_state == MENU_STATE.LISTENING_PROMPT_FINISHED:
-                self.menu_state = MENU_STATE.LISTENING_PROMPT
+                self.menu_state = MENU_STATE.MODE_CHOICE
+                return self.menu_state
+
+            # to restart the listening even faster
+            elif self.menu_state == MENU_STATE.LISTENING_PROMPT:
+                self.menu_state = MENU_STATE.MODE_CHOICE
                 return self.menu_state
 
         elif input_event == INPUT_CONTROLLER_ACTION.MIDDLE_BUTTON_TOGGLE:
@@ -104,4 +109,4 @@ class InputControllerStateMachine(QObject):
 
             sys.exit(1)
 
-        return
+        raise Exception("Unhandled state.")

@@ -39,9 +39,12 @@ class InputController(QObject):
         logging.info("Hello InputController!")
 
         try:
-            self.left_button = Button(LEFT_BUTTON_ID)
-            self.right_button = Button(RIGHT_BUTTON_ID)
-            self.middle_button = Button(MIDDLE_BUTTON_ID)
+            time.sleep(1)  # it seems that can improve stability.
+            # launch is badly so for now anyway.
+
+            self.left_button = Button(LEFT_BUTTON_ID, bounce_time=0.1, hold_time=2)
+            self.right_button = Button(RIGHT_BUTTON_ID, bounce_time=0.1, hold_time=2)
+            self.middle_button = Button(MIDDLE_BUTTON_ID, bounce_time=0.1, hold_time=2)
 
             self.left_button.when_released = self.on_left_button_released
             self.right_button.when_released = self.on_right_button_released
@@ -49,6 +52,7 @@ class InputController(QObject):
             self.left_button.when_held = self.on_left_button_held
             self.right_button.when_held = self.on_right_button_held
             self.middle_button.when_held = self.on_middle_button_held
+
         except Exception:
             logging.info(
                 "Failed to initialize button, probably running on a dev machine without them."
