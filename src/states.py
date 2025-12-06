@@ -42,6 +42,17 @@ class InputControllerStateMachine(QObject):
         logging.info("InputControllerStateMachine initialized.")
 
     def next_state(self, input_event: INPUT_CONTROLLER_ACTION):
+        """
+        next_state
+        Params:
+            input_event: the input that triggered a change in internal states
+
+        Returns:
+            the state that will visible to the user (will trigger an image modification)
+
+        Raises:
+            Exception: if it's a state whose transition is not implemented correctly.
+        """
         if input_event == INPUT_CONTROLLER_ACTION.LEFT_BUTTON_TOGGLE:
             logging.info("Transitioning state on LEFT_BUTTON_TOGGLE")
             if self.menu_state == MENU_STATE.MODE_CHOICE:
@@ -59,12 +70,12 @@ class InputControllerStateMachine(QObject):
             # this button allows to restart the prompt listening
             elif self.menu_state == MENU_STATE.LISTENING_PROMPT_FINISHED:
                 self.menu_state = MENU_STATE.MODE_CHOICE
-                return self.menu_state
+                return self.working_mode
 
             # to restart the listening even faster
             elif self.menu_state == MENU_STATE.LISTENING_PROMPT:
                 self.menu_state = MENU_STATE.MODE_CHOICE
-                return self.menu_state
+                return self.working_mode
 
         elif input_event == INPUT_CONTROLLER_ACTION.MIDDLE_BUTTON_TOGGLE:
             # this will return the DISPLAY MODE

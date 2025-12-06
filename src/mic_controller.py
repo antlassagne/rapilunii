@@ -1,6 +1,6 @@
 import logging
-import multiprocessing
 import struct
+import threading
 import wave
 
 from pvrecorder import PvRecorder
@@ -23,10 +23,11 @@ class MicController:
         logging.info("Started listening for prompt...")
         self.is_prompt_available = False
         self.running = True
-        self.listener_thread = multiprocessing.Process(target=self.run, daemon=True)
+        self.listener_thread = threading.Thread(target=self.run, daemon=True)
         self.listener_thread.start()
 
     def stop(self):
+        logging.info("Stopping the mic...")
         self.running = False
         self.listener_thread.join()
 
@@ -44,6 +45,9 @@ class MicController:
         while self.running:
             frame = recorder.read()
             audio.extend(frame)
+            print(".", end="", flush=True)
+
+        logging.info("Stopping the recorder.")
 
         recorder.stop()
         logging.info("Finished recording audio - saving file")

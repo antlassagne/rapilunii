@@ -1,5 +1,5 @@
 import logging
-import multiprocessing
+import threading
 import time
 from enum import Enum
 
@@ -59,7 +59,7 @@ class InputController(QObject):
             )
             logging.info("Falling back to keyboard.")
             self.keyboard_running = True
-            self.listener_thread = multiprocessing.Process(target=self.run, daemon=True)
+            self.listener_thread = threading.Thread(target=self.run, daemon=True)
             self.listener_thread.start()
 
             self.listener = Listener(on_press=self.on_press)

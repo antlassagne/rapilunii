@@ -36,14 +36,14 @@ class LuniiController:
 
         # ping the default client and see if I need to fallback (dev only)
         try:
-            r = requests.get(host)
+            r = requests.get("http://{}:11434".format(host))  # ollama
             if r.status_code == 200:
                 logging.info("Running the remote backend.")
             else:
                 if allow_local_fallback:
                     host = "http://localhost"
-        except Exception as _:
-            logging.info("Server not reachable")
+        except Exception as e:
+            logging.info("Server not reachable: {}".format(e))
             if allow_local_fallback:
                 host = "http://localhost"
                 logging.info(
@@ -88,6 +88,7 @@ class LuniiController:
                 logging.info("Custom handler removed.")
 
     def handle_input(self, key_code: int):
+        logging.debug("Handling input")
         state = self.state_machine.next_state(INPUT_CONTROLLER_ACTION(key_code))
         logging.info("State change: {}".format(state))
         self.on_state_changed(state)
