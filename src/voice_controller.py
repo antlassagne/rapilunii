@@ -237,7 +237,9 @@ class VoiceController(QObject):
         elif self.stt_mode == STT_IMPL.REMOTE_FASTER_WHISPER:
             files = {"audio_file": open(audio_file_path, "rb")}
             r = requests.post(self.remote_fast_whisper_stt_server, files=files)
-            logging.info(f"{r.status_code}: {r.json()}")
+            result = r.json()
+            logging.info(f"{r.status_code}: {result}")
+            return result["text"]
         return "NOT IMPLEMENTED"
 
     def play_audio_file(self, audio_file_path: str):

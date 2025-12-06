@@ -101,7 +101,7 @@ class OllamaController(QObject):
         self.story = ""
         untouched_story = ""
         if working_mode == WORKING_MODE.CONVERSATION_MODE:
-            preprompt = self.conversation_prepompt
+            preprompt = self.conversation_preprompt
             func = self.client.chat
         else:
             preprompt = self.story_preprompt
