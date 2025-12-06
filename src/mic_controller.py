@@ -46,6 +46,7 @@ class MicController:
             frame = recorder.read()
             audio.extend(frame)
             print(".", end="", flush=True)
+        print(".")
 
         logging.info("Stopping the recorder.")
 

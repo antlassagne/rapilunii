@@ -2,8 +2,10 @@ import logging
 import threading
 import time
 from enum import Enum
+from pathlib import Path
 from queue import Queue
 
+import httpx
 import requests  # type: ignore
 from faster_whisper import WhisperModel
 from nava import play
@@ -12,10 +14,53 @@ from PyQt6.QtCore import pyqtSignal as Signal
 
 from src.alltalk_controller import AllTalkController
 
+SOUND_FORMAT = "wav"  # or "wav" or "mp3"
+
+
+class SpeachesModel:
+    model: str
+    voice: str
+    language: str
+
+    def __init__(self, model: str, voice: str, language: str = "multilingual"):
+        self.model = model
+        self.voice = voice
+        self.language = language
+
+
+class kokoro_models:
+    kokoro_base = SpeachesModel(
+        model="speaches-ai/Kokoro-82M-v1.0-ONNX", voice="ff_siwis"
+    )
+    kokoro_base_int8 = SpeachesModel(
+        model="speaches-ai/Kokoro-82M-v1.0-ONNX-int8", voice="ff_siwis"
+    )
+    kokoro_base_fp16 = SpeachesModel(
+        model="speaches-ai/Kokoro-82M-v1.0-ONNX-fp16", voice="ff_siwis"
+    )
+    kokoro_suronek = SpeachesModel(
+        model="suronek/Kokoro-82M-v1.1-zh-ONNX", voice="ff_siwis"
+    )
+    piper_upmc = SpeachesModel(
+        model="speaches-ai/piper-fr_FR-upmc-medium", voice="upmc", language="fr"
+    )
+    # really bad
+    piper_mls = SpeachesModel(
+        model="speaches-ai/piper-fr_FR-mls-medium", voice="upmc", language="fr"
+    )
+    piper_siwis = SpeachesModel(
+        model="speaches-ai/piper-fr_FR-siwis-medium", voice="siwis", language="fr"
+    )
+    # best?
+    piper_tom = SpeachesModel(
+        model="speaches-ai/piper-fr_FR-tom-medium", voice="tom", language="fr"
+    )
+
 
 class TTS_IMPL(Enum):
     ALLTALK = 0
     COQUI = 1
+    SPEACHES = 3
 
 
 class STT_IMPL(Enum):
@@ -25,9 +70,9 @@ class STT_IMPL(Enum):
 
 class VoiceController(QObject):
     tts_ready = Signal(str)
-    job_done = Signal
+    job_done = Signal()
 
-    tts_mode = TTS_IMPL.ALLTALK  # alltalk
+    tts_mode = TTS_IMPL.SPEACHES
     stt_mode = STT_IMPL.REMOTE_FASTER_WHISPER
 
     # Queue for TTS worker
@@ -51,10 +96,14 @@ class VoiceController(QObject):
             # or run on CPU with INT8
             # model = WhisperModel(model_size, device="cpu", compute_type="int8")
 
-        self.coqui_tts_server = "{}:5002/api/tts".format(host)
-        self.remote_fast_whisper_stt_server = "{}:9876/api/v0/transcribe".format(host)
+        if self.tts_mode == TTS_IMPL.SPEACHES:
+            self.tts_client = httpx.Client(base_url="http://{}:8000/".format(host))
+            self.tts_model = kokoro_models.piper_tom
+        else:  ## these were just used during testing
+            self.coqui_tts_server = "{}:5002/api/tts".format(host)
+            self.alltalk_controller = AllTalkController()
 
-        self.alltalk_controller = AllTalkController()
+        self.remote_fast_whisper_stt_server = "{}:9876/api/v0/transcribe".format(host)
 
         self.running = True
         self.tts_thread = threading.Thread(target=self.tts_worker, daemon=True)
@@ -87,10 +136,9 @@ class VoiceController(QObject):
         self.tts_queue.put(text)
         logging.info("> TTS queue size: {}".format(self.tts_queue.qsize()))
 
-    def push_to_playback_queue(self, audio_file_path: str, final: bool):
+    def push_to_playback_queue(self, audio_file_path: str):
         logging.info("> Playback queuing audio file: {}".format(audio_file_path))
         self.playback_queue.put(audio_file_path)
-        self.received_final_chunk_to_play = True
         logging.info("> Playback queue size: {}".format(self.playback_queue.qsize()))
 
     def tts_worker(self):
@@ -105,7 +153,7 @@ class VoiceController(QObject):
             text = self.tts_queue.get()
             id = id + 1
             logging.info("> TTS worker got text: {}".format(text))
-            output_file = "story_chunk_{}.wav".format(id)
+            output_file = "user_prompt_{}.{}".format(id, SOUND_FORMAT)
             self.text_to_speech(text, output_file)
             self.tts_ready.emit(output_file)
             self.tts_queue.task_done()
@@ -131,7 +179,21 @@ class VoiceController(QObject):
     def text_to_speech(self, text: str, output_file: str):
         logging.info("> TTS starting TTS request")
 
-        if self.tts_mode == TTS_IMPL.ALLTALK:
+        if self.tts_mode == TTS_IMPL.SPEACHES:
+            res = self.tts_client.post(
+                "v1/audio/speech",
+                json={
+                    "model": self.tts_model.model,
+                    "voice": self.tts_model.voice,
+                    "input": text,
+                    "response_format": SOUND_FORMAT,  # or mp3
+                    "speed": 1,
+                },
+            ).raise_for_status()
+            with Path(output_file).open("wb") as f:
+                f.write(res.read())
+
+        elif self.tts_mode == TTS_IMPL.ALLTALK:
             _ = self.alltalk_controller.generate_tts(
                 text,
                 character_voice="female_06.wav",

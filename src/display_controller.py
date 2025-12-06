@@ -25,6 +25,7 @@ class DisplayController:
             MENU_STATE.LISTENING_PROMPT: "./resources/lowres/listening_320.jpg",
             MENU_STATE.LISTENING_PROMPT_FINISHED: "./resources/lowres/validate_320.jpg",
             MENU_STATE.GENERATING_PROMPT: "./resources/lowres/listenup_320.jpg",
+            DISPLAY_MODE.DEV: "",
         }
 
         self.log_queue: deque = deque(maxlen=MAX_AMOUNT_OF_LINES)

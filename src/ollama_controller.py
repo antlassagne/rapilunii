@@ -50,7 +50,7 @@ class OllamaController(QObject):
 
     def refine_and_publish_story_if_ready(self):
         if self.refine_story():
-            logging.info("Story chunk ready: {}".format(self.story_to_publish))
+            logging.info("\nStory chunk ready: {}".format(self.story_to_publish))
             self.story_chunk_ready.emit(self.story_to_publish)
             self.story_to_publish = None
 
@@ -98,22 +98,23 @@ class OllamaController(QObject):
         self, prompt, working_mode, async_mode: bool = False
     ):
         self.running = True
-        logging.info(f"Getting story for prompt: {prompt}")
         self.story = ""
         untouched_story = ""
         if working_mode == WORKING_MODE.CONVERSATION_MODE:
             preprompt = self.conversation_prepompt
+            func = self.client.chat
         else:
             preprompt = self.story_preprompt
+            func = self.client.generate
 
-        for chunk in self.client.generate(
+        for chunk in func(
             model=self.story_model,
             prompt=preprompt + prompt,
             stream=True,
         ):
             # logging.info(chunk)
             # logging.info(type(chunk))
-            print(".", end="", flush=True)
+            print("#", end="", flush=True)
             story_chunk = chunk["response"]
             self.story += story_chunk
             untouched_story += story_chunk

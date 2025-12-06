@@ -68,7 +68,9 @@ python3 TTS/server/server.py --model_name tts_models/fr/mai/tacotron2-DDC --use_
 
 and configure the right server IP / port
 
-### Alltalk, you are the chosen one
+### Alltalk, you ~~are~~were the chosen one
+
+Not compatible with ARM64
 
 ```
 apt install libaio-dev espeak-ng
@@ -78,7 +80,55 @@ cd alltalk_tts
 ./start_alltalk.sh
 ```
 
+### Speaches
+
+https://speaches.ai/usage/text-to-speech/
+
+```
+docker run \
+  --detach \
+  --publish 8000:8000 \
+  --name speaches \
+  --restart always \
+  --volume hf-hub-cache:/home/ubuntu/.cache/huggingface/hub \
+  --gpus=all \
+  ghcr.io/speaches-ai/speaches:latest-cuda
+```
+
 ## Rebuilding the Stack
+
+## Speaches
+
+First, enter the docker container and source the venv
+
+```bash
+docker exec -it --user 0 speaches /bin/bash
+source .venv/bin/activate
+```
+
+To list
+
+```bash
+export SPEACHES_BASE_URL="http://localhost:8000"
+
+# Listing all available TTS models
+uv tool run speaches-cli registry ls --task text-to-speech | jq '.data | [].id'
+
+# Downloading a TTS model
+uv tool run speaches-cli model download speaches-ai/Kokoro-82M-v1.0-ONNX
+
+# Check that the model has been installed
+uv tool run speaches-cli model ls --task text-to-speech | jq '.data | map(select(.id == "speaches-ai/Kokoro-82M-v1.0-ONNX"))'
+```
+
+Kokoro models that supports fr:
+suronek/Kokoro-82M-v1.1-zh-ONNX
+speaches-ai/Kokoro-82M-v1.0-ONNX
+speaches-ai/Kokoro-82M-v1.0-ONNX-int8
+speaches-ai/Kokoro-82M-v1.0-ONNX-fp16
+
+language: multilingual
+voice: ff_siwis
 
 ### Remote fast whisper
 
