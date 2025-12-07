@@ -11,9 +11,6 @@ if ROOT not in sys.path:
 import logging
 import time
 
-from src.display_controller import DisplayController
-from src.states import DISPLAY_MODE
-
 # logging settings cleanup, because on some configuration I had problems
 # 1. Check existing configuration
 root_logger = logging.getLogger()
@@ -28,6 +25,8 @@ logging.basicConfig(
     level=logging.INFO, format="%(levelname)-5s - %(filename)-20s - %(message)s"
 )
 
+from src.display_controller import DisplayController
+from src.states import DISPLAY_MODE
 
 display = DisplayController()
 display.mode = DISPLAY_MODE.DEV

@@ -25,10 +25,8 @@ logging.basicConfig(
     level=logging.INFO, format="%(levelname)-5s - %(filename)-20s - %(message)s"
 )
 
-from src.input_controller import InputController
+from src.voice_controller import SOUND_FORMAT, VoiceController
 
-input = InputController()
-
-while True:
-    print(".", end="", flush=True)
-    time.sleep(0.5)
+voice_controller = VoiceController("http://localhost")
+text = "Bonjour je m'appelle Kévin"
+voice_controller.text_to_speech(text=text, output_file="test.{}".format(SOUND_FORMAT))

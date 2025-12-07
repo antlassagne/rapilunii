@@ -97,7 +97,9 @@ class VoiceController(QObject):
             # model = WhisperModel(model_size, device="cpu", compute_type="int8")
 
         if self.tts_mode == TTS_IMPL.SPEACHES:
-            self.tts_client = httpx.Client(base_url="http://{}:8000/".format(host))
+            tts_url = "{}:8000/".format(host)
+            logging.info("TTS server on {}".format(tts_url))
+            self.tts_client = httpx.Client(base_url=tts_url)
             self.tts_model = kokoro_models.piper_tom
         else:  ## these were just used during testing
             self.coqui_tts_server = "{}:5002/api/tts".format(host)

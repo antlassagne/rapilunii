@@ -52,7 +52,7 @@ ollama pull obautomation/OpenEuroLLM-French # will be done automatically but doi
 - Step 2: STT setting
 
 ```bash
-docker run --gpus all -e LANGUAGE=fr -e MODEL=large-v3 -e DEVICE=cpu -e TRANSLATE=no -e COMPUTE_SIZE=float32 -p 9876:9876 braoutch/remotefastwhisper:latest
+docker run --restart=always --gpus all -e LANGUAGE=fr -e MODEL=large-v3 -e DEVICE=cpu -e TRANSLATE=no -e COMPUTE_SIZE=float32 -p 9876:9876 --name stt braoutch/remotefastwhisper:latest
 ```
 
 - Step 3 TTS setting
