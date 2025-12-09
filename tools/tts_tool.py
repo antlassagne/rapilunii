@@ -27,6 +27,6 @@ logging.basicConfig(
 
 from src.voice_controller import SOUND_FORMAT, VoiceController
 
-voice_controller = VoiceController("http://localhost")
-text = "Bonjour je m'appelle Kévin"
+voice_controller = VoiceController("http://192.168.1.100")
+text = "Bonjour je m'appelle Kévin et j'aime faire des chatouilles partout partout."
 voice_controller.text_to_speech(text=text, output_file="test.{}".format(SOUND_FORMAT))

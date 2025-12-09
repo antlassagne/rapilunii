@@ -52,7 +52,7 @@ ollama pull obautomation/OpenEuroLLM-French # will be done automatically but doi
 - Step 2: STT setting
 
 ```bash
-docker run --restart=always --gpus all -e LANGUAGE=fr -e MODEL=large-v3 -e DEVICE=cpu -e TRANSLATE=no -e COMPUTE_SIZE=float32 -p 9876:9876 --name stt braoutch/remotefastwhisper:latest
+docker run --restart=always --detach --gpus all -e LANGUAGE=fr -e MODEL=large-v3 -e DEVICE=cuda -e TRANSLATE=no -e COMPUTE_SIZE=float32 -p 9876:9876 --name stt braoutch/remotefastwhisper:latest
 ```
 
 - Step 3 TTS setting
@@ -84,15 +84,30 @@ cd alltalk_tts
 
 https://speaches.ai/usage/text-to-speech/
 
-```
+```bash
 docker run \
   --detach \
   --publish 8000:8000 \
-  --name speaches \
+  --name tts \
   --restart always \
   --volume hf-hub-cache:/home/ubuntu/.cache/huggingface/hub \
   --gpus=all \
   ghcr.io/speaches-ai/speaches:latest-cuda
+```
+
+and then download the models
+
+```bash
+export URL=http://localhost:8000/v1
+# to list STT
+# curl "$URL/registry?task=automatic-speech-recognition" | jq '[.data[].id]'
+
+# to list TTS
+# curl "$URL/registry?task=text-to-speech" | jq '[.data[].id]'
+
+# and then download some
+curl "$URL/models/deepdml/faster-distil-whisper-large-v3.5" -X POST
+curl "$URL/v1/models/speaches-ai/piper-fr_FR-tom-medium" -X POST
 ```
 
 ## Rebuilding the Stack

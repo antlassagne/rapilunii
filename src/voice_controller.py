@@ -66,6 +66,7 @@ class TTS_IMPL(Enum):
 class STT_IMPL(Enum):
     FAST_WHISPER = 0
     REMOTE_FASTER_WHISPER = 1
+    SPEACHES = 3
 
 
 class VoiceController(QObject):
@@ -73,7 +74,7 @@ class VoiceController(QObject):
     job_done = Signal()
 
     tts_mode = TTS_IMPL.SPEACHES
-    stt_mode = STT_IMPL.REMOTE_FASTER_WHISPER
+    stt_mode = STT_IMPL.SPEACHES
 
     # Queue for TTS worker
     tts_queue: Queue = Queue(maxsize=1000)
@@ -96,12 +97,13 @@ class VoiceController(QObject):
             # or run on CPU with INT8
             # model = WhisperModel(model_size, device="cpu", compute_type="int8")
 
-        if self.tts_mode == TTS_IMPL.SPEACHES:
-            tts_url = "{}:8000/".format(host)
-            logging.info("TTS server on {}".format(tts_url))
-            self.tts_client = httpx.Client(base_url=tts_url)
+        if self.tts_mode == TTS_IMPL.SPEACHES or self.stt_mode == STT_IMPL.SPEACHES:
+            self.speaches_url = "{}:8000/".format(host)
+            logging.info("TTS server on {}".format(self.speaches_url))
+            self.tts_client = httpx.Client(base_url=self.speaches_url)
             self.tts_model = kokoro_models.piper_tom
-        else:  ## these were just used during testing
+            self.stt_model = "deepdml/faster-distil-whisper-large-v3.5"
+        elif self.tts_mode != TTS_IMPL.SPEACHES:  ## these were just used during testing
             self.coqui_tts_server = "{}:5002/api/tts".format(host)
             self.alltalk_controller = AllTalkController()
 
@@ -242,6 +244,18 @@ class VoiceController(QObject):
             result = r.json()
             logging.info(f"{r.status_code}: {result}")
             return result["text"]
+        elif self.stt_mode == STT_IMPL.SPEACHES:
+            print("logging", audio_file_path)
+            files = {"file": open(audio_file_path, "rb")}
+            data = {"model": self.stt_model}
+            response = httpx.post(
+                "{}v1/audio/transcriptions".format(self.speaches_url),
+                files=files,
+                data=data,
+                timeout=100,
+            )
+            logging.info("STT response: {}".format(response))
+            return response.text
         return "NOT IMPLEMENTED"
 
     def play_audio_file(self, audio_file_path: str):

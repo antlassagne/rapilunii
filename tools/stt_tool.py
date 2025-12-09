@@ -28,4 +28,4 @@ logging.basicConfig(
 from src.voice_controller import VoiceController
 
 voice_controller = VoiceController("http://localhost")
-voice_controller.speech_to_text("temp_audio.wav")
+print(voice_controller.speech_to_text("user_prompt_1.wav"))
