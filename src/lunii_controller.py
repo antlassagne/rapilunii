@@ -37,7 +37,8 @@ class LuniiController:
         # ping the default client and see if I need to fallback (dev only)
         try:
             r = requests.get("http://{}:11434".format(host))  # ollama
-            if r.status_code == 200:
+            r2 = requests.get("http://{}:8000/health".format(host))  # speaches
+            if r.status_code == 200 and r2.status_code == 200:
                 logging.info("Running the remote backend.")
             else:
                 if allow_local_fallback:
@@ -57,8 +58,6 @@ class LuniiController:
         self.mic = MicController()
         self.input = InputController()
         self.state_machine = InputControllerStateMachine()
-        self.display.update(self.state_machine.working_mode)
-        logging.info("La Boite est prête!")
 
         # Input signal (now onl from the keyboard during development)
         self.input.key_pressed.connect(self.handle_input)
@@ -78,6 +77,8 @@ class LuniiController:
         # self.voice.push_to_tts_queue(test)
         # text = "je voudrais une histoire sur les étoiles avec des chiens et des chats, en 5 phrases."
         # story = self.ollama.generate_text_response(text, WORKING_MODE.STORY_MODE, True)
+        self.display.update(self.state_machine.working_mode)
+        logging.info("La Boite est prête!")
 
     def stop_logger(self):
         logger = logging.getLogger()

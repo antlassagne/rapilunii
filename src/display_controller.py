@@ -26,6 +26,7 @@ class DisplayController:
             MENU_STATE.LISTENING_PROMPT_FINISHED: "./resources/lowres/validate_320.jpg",
             MENU_STATE.GENERATING_PROMPT: "./resources/lowres/listenup_320.jpg",
             DISPLAY_MODE.DEV: "",
+            MENU_STATE.LOADING: "./resources/lowres/loading_320.jpg",
         }
 
         self.log_queue: deque = deque(maxlen=MAX_AMOUNT_OF_LINES)
@@ -55,7 +56,7 @@ class DisplayController:
         except FileNotFoundError as e:
             logging.info("DisplayController error: {}".format(e))
 
-        self.update(WORKING_MODE.CONVERSATION_MODE)
+        self.update(MENU_STATE.LOADING)
 
     def stop(self):
         if self.disp is not None:

@@ -102,7 +102,7 @@ class VoiceController(QObject):
             logging.info("TTS server on {}".format(self.speaches_url))
             self.tts_client = httpx.Client(base_url=self.speaches_url)
             self.tts_model = kokoro_models.piper_tom
-            self.stt_model = "deepdml/faster-distil-whisper-large-v3.5"
+            self.stt_model = "Kelno/whisper-large-v3-french-distil-dec16-ct2"
         elif self.tts_mode != TTS_IMPL.SPEACHES:  ## these were just used during testing
             self.coqui_tts_server = "{}:5002/api/tts".format(host)
             self.alltalk_controller = AllTalkController()
@@ -247,7 +247,7 @@ class VoiceController(QObject):
         elif self.stt_mode == STT_IMPL.SPEACHES:
             print("logging", audio_file_path)
             files = {"file": open(audio_file_path, "rb")}
-            data = {"model": self.stt_model}
+            data = {"model": self.stt_model, "translation": False, "language": "fr"}
             response = httpx.post(
                 "{}v1/audio/transcriptions".format(self.speaches_url),
                 files=files,

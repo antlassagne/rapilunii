@@ -106,7 +106,7 @@ export URL=http://localhost:8000/v1
 # curl "$URL/registry?task=text-to-speech" | jq '[.data[].id]'
 
 # and then download some
-curl "$URL/models/deepdml/faster-distil-whisper-large-v3.5" -X POST
+curl "$URL/models/Kelno/whisper-large-v3-french-distil-dec16-ct2" -X POST
 curl "$URL/v1/models/speaches-ai/piper-fr_FR-tom-medium" -X POST
 ```
 
