@@ -22,7 +22,7 @@ Class that detects keyboard key presses and emits signals accordingly.
 """
 
 LEFT_BUTTON_ID = 16
-MIDDLE_BUTTON_ID = 17
+MIDDLE_BUTTON_ID = 26
 RIGHT_BUTTON_ID = 21
 
 

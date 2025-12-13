@@ -38,7 +38,7 @@ class OllamaController(QObject):
 
         self.story_model = "MathiasB/llama3fr"
         self.story_model = "jobautomation/OpenEuroLLM-French"
-        self.story_preprompt = "Tu es un conteur d'histoires pour enfants de 3 ans. Crée une histoire captivante et imaginative. L'histoire doit durer 3 minutes. Évidemment tu tutoies l'enfant et tu parles un français correct, bien qu'adapté à cet âge. Pas d'introduction, tu commences l'histoire tout de suite, et n'ajoute rien non plus une fois l'histoire terminée. Donne un titre, mais ne commence pas par 'il était une fois.'. Base toi sur le prompt suivant: "
+        self.story_preprompt = "Tu es un conteur d'histoires pour enfants de 3 ans. Crée une histoire captivante et imaginative. L'histoire doit durer 3 minutes. Évidemment tu tutoies l'enfant et tu parles un français correct, bien qu'adapté à cet âge. Pas d'introduction, pas de titre, tu commences l'histoire tout de suite, et n'ajoute rien non plus une fois l'histoire terminée. L'histoire sera lue telle quelle par une seule voix. Pas non plus de didascalies. Donne un titre, mais ne commence pas par 'il était une fois.'. Base toi sur le prompt suivant: "
         self.conversation_preprompt = ""
 
     def stop(self):

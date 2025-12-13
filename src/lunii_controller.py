@@ -31,13 +31,15 @@ class LuniiController:
         host = args.remote_worker_ip
         allow_local_fallback = args.allow_local_fallback
         self.async_mode = not args.sync_mode
+        if host.startswith("http") is False:
+            host = "http://{}".format(host)
         logging.info("Remote worker IP: {}".format(host))
         logging.info("Async mode: {}".format(self.async_mode))
 
         # ping the default client and see if I need to fallback (dev only)
         try:
-            r = requests.get("http://{}:11434".format(host))  # ollama
-            r2 = requests.get("http://{}:8000/health".format(host))  # speaches
+            r = requests.get("{}:11434".format(host))  # ollama
+            r2 = requests.get("{}:8000/health".format(host))  # speaches
             if r.status_code == 200 and r2.status_code == 200:
                 logging.info("Running the remote backend.")
             else:

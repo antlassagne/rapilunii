@@ -5,8 +5,7 @@ import os
 import signal
 import sys
 
-from PyQt6.QtCore import QTimer
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import QCoreApplication, QTimer
 
 from src.lunii_controller import LuniiController
 
@@ -28,7 +27,7 @@ logging.basicConfig(
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
+    app = QCoreApplication(sys.argv)
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -56,7 +55,7 @@ if __name__ == "__main__":
         lunii.display.stop()
         # lunii.mic.stop()
 
-        QApplication.quit()
+        QCoreApplication.quit()
 
     # Handle Ctrl+C gracefully
     signal.signal(signal.SIGINT, signal_handler)
