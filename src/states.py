@@ -20,6 +20,8 @@ class MENU_STATE(Enum):
 class WORKING_MODE(Enum):
     CONVERSATION_MODE = 0
     STORY_MODE = 1
+    RANDOM_RECORDING_MODE = 2
+    LAST = 3
 
 
 class WORKING_LANGUAGE(Enum):
@@ -58,9 +60,12 @@ class InputControllerStateMachine(QObject):
             logging.info("Transitioning state on LEFT_BUTTON_TOGGLE")
             if self.menu_state == MENU_STATE.MODE_CHOICE:
                 # switch working mode
-                self.working_mode = WORKING_MODE(not bool(int(self.working_mode.value)))
+                self.working_mode = WORKING_MODE(int(self.working_mode.value) + 1)
+                if self.working_mode == WORKING_MODE.LAST:
+                    self.working_mode = WORKING_MODE.CONVERSATION_MODE
                 return self.working_mode
-            # multilanguage is bothersome to setup ATM because my STT server cannot dynamically change languages
+
+            # multilanguage is TODO
             # elif self.menu_state == MENU_STATE.LANGUAGE_CHOICE:
             #     # switch language
             #     self.working_language = WORKING_LANGUAGE(
@@ -78,6 +83,11 @@ class InputControllerStateMachine(QObject):
                 self.menu_state = MENU_STATE.MODE_CHOICE
                 return self.working_mode
 
+            # to cancel generation/playback
+            elif self.menu_state == MENU_STATE.GENERATING_PROMPT:
+                self.menu_state = MENU_STATE.MODE_CHOICE
+                return self.working_mode
+
         elif input_event == INPUT_CONTROLLER_ACTION.MIDDLE_BUTTON_TOGGLE:
             # this will return the DISPLAY MODE
             logging.info("Transitioning state on MIDDLE_BUTTON_TOGGLE")
@@ -89,13 +99,15 @@ class InputControllerStateMachine(QObject):
             logging.info("Transitioning state on RIGHT_BUTTON_TOGGLE")
             # this will return the MENU_STATE
             if self.menu_state == MENU_STATE.MODE_CHOICE:
-                if self.working_mode == WORKING_MODE.CONVERSATION_MODE:
+                if self.working_mode == WORKING_MODE.STORY_MODE:
                     self.menu_state = MENU_STATE.LISTENING_PROMPT
-                else:
+                elif self.working_mode == WORKING_MODE.CONVERSATION_MODE:
                     # not implemented RN
                     # self.menu_state = MENU_STATE.LANGUAGE_CHOICE
                     # fallback
                     self.menu_state = MENU_STATE.LISTENING_PROMPT
+                elif self.working_mode == WORKING_MODE.RANDOM_RECORDING_MODE:
+                    self.menu_state = MENU_STATE.GENERATING_PROMPT
 
             elif self.menu_state == MENU_STATE.LANGUAGE_CHOICE:
                 self.menu_state = MENU_STATE.LISTENING_PROMPT

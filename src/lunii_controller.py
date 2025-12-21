@@ -1,5 +1,4 @@
 import logging
-import sys
 
 import requests  # type: ignore
 
@@ -8,6 +7,7 @@ from src.input_controller import INPUT_CONTROLLER_ACTION, InputController
 from src.logging_handler import CallbackHandler
 from src.mic_controller import MicController
 from src.ollama_controller import OllamaController
+from src.recordings_controller import RecordingsController
 from src.states import (
     DISPLAY_MODE,
     MENU_STATE,
@@ -27,11 +27,11 @@ class LuniiController:
         hook_handler = CallbackHandler(callback=self.display.push_log_to_display_queue)
         logger = logging.getLogger()
         logger.addHandler(hook_handler)
+        self.ai_available = True
 
         host = args.remote_worker_ip
-        allow_local_fallback = args.allow_local_fallback
         self.async_mode = not args.sync_mode
-        if host.startswith("http") is False:
+        if host and host.startswith("http") is False:
             host = "http://{}".format(host)
         logging.info("Remote worker IP: {}".format(host))
         logging.info("Async mode: {}".format(self.async_mode))
@@ -43,23 +43,18 @@ class LuniiController:
             if r.status_code == 200 and r2.status_code == 200:
                 logging.info("Running the remote backend.")
             else:
-                if allow_local_fallback:
-                    host = "http://localhost"
+                logging.info("Server not reachable.")
+                self.ai_available = False
         except Exception as e:
             logging.info("Server not reachable: {}".format(e))
-            if allow_local_fallback:
-                host = "http://localhost"
-                logging.info(
-                    "Cannot reach the remote backend, running the backend locally."
-                )
-            else:
-                sys.exit(1)
+            self.ai_available = False
 
         self.ollama = OllamaController(host=host)
         self.voice = VoiceController(host=host)
         self.mic = MicController()
         self.input = InputController()
         self.state_machine = InputControllerStateMachine()
+        self.recordings = RecordingsController()
 
         # Input signal (now onl from the keyboard during development)
         self.input.key_pressed.connect(self.handle_input)
@@ -115,11 +110,23 @@ class LuniiController:
                 )
 
             if state == MENU_STATE.GENERATING_PROMPT:
-                self.new_story_from_mic(self.async_mode)
+                if (
+                    self.state_machine.working_mode
+                    == WORKING_MODE.RANDOM_RECORDING_MODE
+                ):
+                    logging.info("Playing a random recording...")
+                    recording_file = self.recordings.get_random_recording()
+                    if recording_file:
+                        self.voice.push_to_playback_queue(recording_file)
+                        self.voice.received_final_chunk_to_play = True
+                    else:
+                        logging.info("No recordings available.")
+                else:
+                    self.new_story_from_mic(self.async_mode)
 
             if state == MENU_STATE.MODE_CHOICE:
                 self.mic.stop()
-                self.voice.stop()
+                self.voice.reset()
                 self.ollama.stop()
 
     def on_story_tts_available(self, story_tts_filepath):

@@ -8,7 +8,7 @@ from queue import Queue
 import httpx
 import requests  # type: ignore
 from faster_whisper import WhisperModel
-from nava import play
+from just_playback import Playback
 from PyQt6.QtCore import QObject
 from PyQt6.QtCore import pyqtSignal as Signal
 
@@ -73,6 +73,8 @@ class VoiceController(QObject):
     tts_ready = Signal(str)
     job_done = Signal()
 
+    playback = Playback()
+
     tts_mode = TTS_IMPL.SPEACHES
     stt_mode = STT_IMPL.SPEACHES
 
@@ -124,12 +126,25 @@ class VoiceController(QObject):
     def reset(self):
         self.received_final_chunk = False
         self.received_final_chunk_to_play = False
+        self.stop_audio_playback()
+        # self.stop()
+
+        # self.running = True
+        # self.tts_thread = threading.Thread(target=self.tts_worker, daemon=True)
+        # self.tts_thread.start()
+        # self.playback_thread = threading.Thread(
+        #     target=self.playback_worker, daemon=True
+        # )
+        # self.playback_thread.start()
 
     def stop(self):
         logging.info("Stopping VoiceController...")
+        self.stop_audio_playback()
         self.running = False
-        self.tts_thread.join()
-        self.playback_thread.join()
+        if self.tts_thread and self.tts_thread.is_alive():
+            self.tts_thread.join()
+        if self.playback_thread and self.playback_thread.is_alive():
+            self.playback_thread.join()
         logging.info(" done.")
 
     def signal_received_final_text_chunk(self):
@@ -258,7 +273,23 @@ class VoiceController(QObject):
             return response.text
         return "NOT IMPLEMENTED"
 
+    def stop_audio_playback(self):
+        logging.info("Stopping audio playback")
+        if self.playback.paused:
+            self.playback.resume()
+        self.playback.stop()
+
     def play_audio_file(self, audio_file_path: str):
         logging.info(f"Playing audio file: {audio_file_path}")
-        play(audio_file_path, async_mode=False)
+        self.playback.load_file(audio_file_path)
+        self.playback.play()
+        self.playback.pause()
+        self.playback.seek(0)
+        self.playback.resume()
+
+        while self.playback.active:
+            time.sleep(0.2)
+
         time.sleep(1)  # small delay to ensure smooth playback
+
+        logging.info("Finished playing audio file: {}".format(audio_file_path))

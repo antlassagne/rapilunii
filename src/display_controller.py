@@ -23,6 +23,7 @@ class DisplayController:
             WORKING_LANGUAGE.FRENCH: "french",
             WORKING_MODE.CONVERSATION_MODE: "./resources/lowres/conversation_320.jpg",
             WORKING_MODE.STORY_MODE: "./resources/lowres/story_320.jpg",
+            WORKING_MODE.RANDOM_RECORDING_MODE: "./resources/lowres/random_320.jpg",
             MENU_STATE.LISTENING_PROMPT: "./resources/lowres/listening_320.jpg",
             MENU_STATE.LISTENING_PROMPT_FINISHED: "./resources/lowres/validate_320.jpg",
             MENU_STATE.GENERATING_PROMPT: "./resources/lowres/listenup_320.jpg",
@@ -105,11 +106,12 @@ class DisplayController:
         # self.draw.text((5, 160), "1234567890", fill="GREEN", font=Font3)
 
     def display_image(self, image_path):
+        if image_path == "previous":
+            image_path = self.last_image_path
+
         if image_path == "":
             logging.info("No image to display for this state.")
             return
-        if image_path == "previous":
-            image_path = self.last_image_path
 
         logging.info("Display image {}".format(image_path))
         image = Image.open(image_path)
@@ -118,7 +120,8 @@ class DisplayController:
         if self.disp is not None:
             self.disp.clear()
             self.disp.ShowImage(image)
-            self.last_image_path = image_path
+
+        self.last_image_path = image_path
 
     def push_log_to_display_queue(self, text: str):
         self.log_queue.append(text)
