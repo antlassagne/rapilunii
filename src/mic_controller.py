@@ -8,6 +8,7 @@ from pvrecorder import PvRecorder
 
 class MicController:
     prompt: str = ""
+    listener_thread: threading.Thread | None = None
 
     def __init__(self):
         super().__init__()
@@ -29,7 +30,8 @@ class MicController:
     def stop(self):
         logging.info("Stopping the mic...")
         self.running = False
-        self.listener_thread.join()
+        if self.listener_thread and self.listener_thread.is_alive():
+            self.listener_thread.join()
 
     def run(self):
         # Create a temporary file to store the recorded audio (this will be deleted once we've finished transcription)

@@ -124,6 +124,7 @@ class VoiceController(QObject):
         self.stop()
 
     def reset(self):
+        logging.info("VoiceController reset called.")
         self.received_final_chunk = False
         self.received_final_chunk_to_play = False
         self.stop_audio_playback()

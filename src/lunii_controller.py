@@ -53,7 +53,7 @@ class LuniiController:
         self.voice = VoiceController(host=host)
         self.mic = MicController()
         self.input = InputController()
-        self.state_machine = InputControllerStateMachine()
+        self.state_machine = InputControllerStateMachine(self.ai_available)
         self.recordings = RecordingsController()
 
         # Input signal (now onl from the keyboard during development)
@@ -99,6 +99,11 @@ class LuniiController:
         self.display.update(state)
 
         # then, handle the other controllers
+        if isinstance(state, WORKING_MODE):
+            # we are in the very begging. Making sure nothing is started.
+            self.mic.stop()
+            self.voice.reset()
+
         if isinstance(state, MENU_STATE):
             if state == MENU_STATE.LISTENING_PROMPT:
                 self.mic.start_listening()
@@ -115,7 +120,9 @@ class LuniiController:
                     == WORKING_MODE.RANDOM_RECORDING_MODE
                 ):
                     logging.info("Playing a random recording...")
-                    recording_file = self.recordings.get_random_recording()
+                    recording_file = self.recordings.get_random_recording_by_category(
+                        self.state_machine.recording_category
+                    )
                     if recording_file:
                         self.voice.push_to_playback_queue(recording_file)
                         self.voice.received_final_chunk_to_play = True

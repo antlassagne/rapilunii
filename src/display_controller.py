@@ -3,7 +3,13 @@ from collections import deque
 
 from PIL import Image, ImageDraw, ImageFont
 
-from src.states import DISPLAY_MODE, MENU_STATE, WORKING_LANGUAGE, WORKING_MODE
+from src.states import (
+    DISPLAY_MODE,
+    MENU_STATE,
+    RANDOM_CATEGORIES,
+    WORKING_LANGUAGE,
+    WORKING_MODE,
+)
 
 MAX_AMOUNT_OF_LINES = 15
 
@@ -24,9 +30,14 @@ class DisplayController:
             WORKING_MODE.CONVERSATION_MODE: "./resources/lowres/conversation_320.jpg",
             WORKING_MODE.STORY_MODE: "./resources/lowres/story_320.jpg",
             WORKING_MODE.RANDOM_RECORDING_MODE: "./resources/lowres/random_320.jpg",
+            WORKING_MODE.PICK_RECORDING_MODE: "./resources/lowres/pick_320.jpg",
             MENU_STATE.LISTENING_PROMPT: "./resources/lowres/listening_320.jpg",
             MENU_STATE.LISTENING_PROMPT_FINISHED: "./resources/lowres/validate_320.jpg",
             MENU_STATE.GENERATING_PROMPT: "./resources/lowres/listenup_320.jpg",
+            RANDOM_CATEGORIES.CASUAL: "./resources/lowres/castle_320.jpg",
+            RANDOM_CATEGORIES.FRIENDLY: "./resources/lowres/fox_320.jpg",
+            RANDOM_CATEGORIES.FEARSOME: "./resources/lowres/monster_320.jpg",
+            RANDOM_CATEGORIES.ALL: "./resources/lowres/random_320.jpg",
             DISPLAY_MODE.DEV: "",
             DISPLAY_MODE.VISUAL: "previous",  # special flag that will be reassigned to the last image displayed
             MENU_STATE.LOADING: "./resources/lowres/loading_320.jpg",

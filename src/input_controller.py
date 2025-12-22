@@ -1,4 +1,5 @@
 import logging
+import sys
 import threading
 import time
 from enum import Enum
@@ -114,6 +115,7 @@ class InputController(QObject):
     def on_middle_button_held(self):
         logging.info("Middle button held.")
         self.key_pressed.emit(INPUT_CONTROLLER_ACTION.MIDDLE_BUTTON_HELD.value)
+        sys.exit(212)
         # reboot the device
 
     def stop(self):
