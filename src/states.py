@@ -16,6 +16,7 @@ class MENU_STATE(Enum):
     LISTENING_PROMPT = 4
     LISTENING_PROMPT_FINISHED = 5
     GENERATING_PROMPT = 6
+    PAUSED = 7
 
 
 class WORKING_MODE(Enum):
@@ -147,6 +148,12 @@ class InputControllerStateMachine(QObject):
                 self.menu_state = MENU_STATE.LISTENING_PROMPT_FINISHED
 
             elif self.menu_state == MENU_STATE.LISTENING_PROMPT_FINISHED:
+                self.menu_state = MENU_STATE.GENERATING_PROMPT
+
+            elif self.menu_state == MENU_STATE.GENERATING_PROMPT:
+                self.menu_state = MENU_STATE.PAUSED
+
+            elif self.menu_state == MENU_STATE.PAUSED:
                 self.menu_state = MENU_STATE.GENERATING_PROMPT
 
             logging.info(f"New menu state: {self.menu_state}")

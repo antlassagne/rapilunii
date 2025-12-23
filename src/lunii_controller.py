@@ -108,6 +108,9 @@ class LuniiController:
             if state == MENU_STATE.LISTENING_PROMPT:
                 self.mic.start_listening()
 
+            if state == MENU_STATE.PAUSED:
+                self.voice.pause_audio_playback()
+
             if state == MENU_STATE.LISTENING_PROMPT_FINISHED:
                 self.mic.stop()
                 logging.info(
@@ -115,6 +118,10 @@ class LuniiController:
                 )
 
             if state == MENU_STATE.GENERATING_PROMPT:
+                if self.voice.is_playback_paused():
+                    self.voice.resume_audio_playback()
+                    return
+
                 if (
                     self.state_machine.working_mode
                     == WORKING_MODE.RANDOM_RECORDING_MODE

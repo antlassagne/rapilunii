@@ -274,6 +274,19 @@ class VoiceController(QObject):
             return response.text
         return "NOT IMPLEMENTED"
 
+    def resume_audio_playback(self):
+        logging.info("Resuming audio playback")
+        if self.playback.paused:
+            self.playback.resume()
+
+    def pause_audio_playback(self):
+        logging.info("Pausing audio playback")
+        if not self.playback.paused:
+            self.playback.pause()
+
+    def is_playback_paused(self) -> bool:
+        return self.playback.paused
+
     def stop_audio_playback(self):
         logging.info("Stopping audio playback")
         if self.playback.paused:
